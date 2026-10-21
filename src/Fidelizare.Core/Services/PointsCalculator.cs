@@ -36,6 +36,28 @@ public static class PointsCalculator
     }
 
     /// <summary>
+    /// Punctele de retras la returul unei sume dintr-un bon.
+    ///
+    /// Clientul păstrează punctele proporționale cu ce a rămas din bon, rotunjite
+    /// în jos, ca la acordare; se retrage diferența față de ce fusese deja retras.
+    /// Calculul pleacă de la punctele efectiv acordate, nu de la regulile de acum,
+    /// deci multiplicatorul de nivel și campania din ziua vânzării rămân valabile
+    /// chiar dacă între timp regulile s-au schimbat. Retururile succesive pe același
+    /// bon ajung împreună exact la punctele acordate, niciodată mai mult.
+    /// </summary>
+    public static int PointsToReverseForReturn(Purchase purchase, decimal returnAmount)
+    {
+        if (returnAmount <= 0 || purchase.NetAmount <= 0 || purchase.PointsEarned <= 0)
+            return 0;
+
+        var remainingAfter = Math.Max(0m, purchase.RemainingAmount - returnAmount);
+        var pointsKept = (int)Math.Floor(purchase.PointsEarned * remainingAfter / purchase.NetAmount);
+        var totalReversed = purchase.PointsEarned - pointsKept;
+
+        return Math.Max(0, totalReversed - purchase.PointsReturned);
+    }
+
+    /// <summary>
     /// Nivelul corespunzător unui rulaj. Nivelurile vin ordonate crescător;
     /// se alege ultimul al cărui prag este atins.
     /// </summary>

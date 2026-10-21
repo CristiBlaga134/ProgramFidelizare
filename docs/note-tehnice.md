@@ -95,6 +95,29 @@ operațiunea raportează cât nu s-a putut retrage. Un sold negativ ar bloca
 clientul la casă pentru o greșeală a magazinului, ceea ce ar fi mai rău decât
 pierderea contabilă.
 
+### Returul parțial
+
+Programul nu cunoaște produsele de pe bon, doar totalul, deci returul se
+consemnează ca sumă. Fiecare retur are propria înregistrare (`PurchaseReturns`),
+iar pe bon se țin totalurile: suma returnată și punctele retrase.
+
+Punctele de retras se calculează proporțional, pornind de la **punctele efectiv
+acordate**, nu de la regulile de acum: clientul păstrează
+`floor(puncte acordate × rest / total)`, iar se retrage diferența față de ce fusese
+deja retras. Așa multiplicatorul de nivel și campania din ziua vânzării rămân
+valabile chiar dacă regulile s-au schimbat între timp, iar retururile succesive pe
+același bon ajung împreună exact la punctele acordate. Funcția este
+`PointsCalculator.PointsToReverseForReturn`.
+
+Retragerea folosește aceeași cale ca anularea, inclusiv regula soldului care nu
+devine negativ. Rulajul pentru nivel, totalul de la înscriere și rapoartele de
+vânzări scad suma returnată. Când tot bonul a fost returnat, bonul se închide ca
+anulat, ca să nu mai conteze nici la numărul de cumpărături. O anulare după un
+retur parțial retrage doar punctele rămase.
+
+Rapoartele atribuie returul zilei vânzării, nu zilei returului: vânzările unei
+zile trecute pot scădea după un retur făcut mai târziu.
+
 ### Rotunjirea
 
 Se face în jos, la fiecare pas. Un bon de 97 lei la 10 lei/punct dă 9 puncte, iar
@@ -375,13 +398,15 @@ greșeala s-ar vedea abia în raportul de la sfârșitul zilei.
 
 ## 7. Testarea
 
-38 de teste automate, concentrate acolo unde greșelile ar costa bani:
+104 teste automate, concentrate acolo unde greșelile ar costa bani:
 
 - rotunjirea punctelor și aplicarea multiplicatorului de nivel;
 - încadrarea pe niveluri, la limitele pragurilor;
 - expirarea și **ordinea de consum a loturilor**;
 - anularea cumpărărilor, inclusiv cazul în care punctele au fost deja cheltuite;
 - anularea recompenselor și restituirea în loturile originale;
+- retururile parțiale: calculul proporțional, retururile succesive pe același bon,
+  efectul asupra nivelului și anularea după un retur;
 - fereastra aniversară, inclusiv trecerea peste 31 decembrie și 29 februarie în
   anii nebisecți;
 - căutarea cu diacritice;

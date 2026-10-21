@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Fidelizare.App.Infrastructure;
 using Fidelizare.App.ViewModels;
 
 namespace Fidelizare.App.Views;
@@ -20,11 +21,16 @@ public partial class PosView : UserControl, IRefreshable
 
         // Câmpul de căutare primește focalizarea la intrarea pe ecran, ca un card
         // scanat să ajungă direct acolo fără să fie nevoie de mouse.
-        Loaded += (_, _) => SearchInput.Focus();
+        Loaded += (_, _) =>
+        {
+            UpdatePermissions();
+            SearchInput.Focus();
+        };
     }
 
     public void Refresh()
     {
+        UpdatePermissions();
         _model.ReloadRules();
         _model.ReloadCustomer();
         SearchInput.Focus();
@@ -57,6 +63,23 @@ public partial class PosView : UserControl, IRefreshable
             _model.RecordSaleCommand.Execute(null);
 
         e.Handled = true;
+    }
+
+    /// <summary>Returul schimbă solduri, deci butonul apare doar celor care îl pot face.</summary>
+    private void UpdatePermissions() =>
+        ReturnButton.Visibility = AppServices.Current.CurrentUser?.CanManagePoints == true
+            ?Visibility.Visible
+            : Visibility.Collapsed;
+
+    /// <summary>Clientul vine cu bonul: returul se caută după numărul lui, iar apoi clientul apare pe ecran.</summary>
+    private void OnReturn(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ReturnWindow { Owner = Window.GetWindow(this) };
+
+        if (dialog.ShowDialog() != true || dialog.CustomerId is not { } customerId)
+            return;
+
+        _model.SelectCustomer(AppServices.Current.Loyalty.GetCustomer(customerId));
     }
 
     private void OnOpenStaffAccounts(object sender, RoutedEventArgs e) =>

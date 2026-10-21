@@ -113,7 +113,7 @@ public sealed class ReportingService
             To = toExclusive,
             PurchaseCount = valid.Count,
             GrossSales = valid.Sum(p => p.GrossAmount),
-            NetSales = valid.Sum(p => p.NetAmount),
+            NetSales = valid.Sum(p => p.RemainingAmount),
             DiscountsGiven = valid.Sum(p => p.DiscountAmount),
             VoidedPurchases = purchases.Count - valid.Count,
             ActiveCustomers = valid.Select(p => p.CustomerId).Distinct().Count(),
@@ -215,7 +215,7 @@ public sealed class ReportingService
         var purchases = uow.Purchases.GetBetween(fromInclusive, toExclusive)
             .Where(p => !p.IsVoided)
             .GroupBy(p => p.CustomerId)
-            .Select(g => new { CustomerId = g.Key, Spend = g.Sum(p => p.NetAmount), Count = g.Count() })
+            .Select(g => new { CustomerId = g.Key, Spend = g.Sum(p => p.RemainingAmount), Count = g.Count() })
             .OrderByDescending(x => x.Spend)
             .Take(take)
             .ToList();
@@ -250,7 +250,7 @@ public sealed class ReportingService
         var byDay = uow.Purchases.GetBetween(fromInclusive, toExclusive)
             .Where(p => !p.IsVoided)
             .GroupBy(p => p.OccurredAt.Date)
-            .ToDictionary(g => g.Key, g => (Net: g.Sum(p => p.NetAmount), Count: g.Count()));
+            .ToDictionary(g => g.Key, g => (Net: g.Sum(p => p.RemainingAmount), Count: g.Count()));
 
         var result = new List<(DateTime, decimal, int)>();
 

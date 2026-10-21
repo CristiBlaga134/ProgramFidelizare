@@ -43,6 +43,7 @@ public sealed class PointTransaction
         PointTransactionType.ReversalOfRedemption => "Anulare recompensă",
         PointTransactionType.Welcome => "Bonus de înscriere",
         PointTransactionType.Birthday => "Bonus zi de naștere",
+        PointTransactionType.Return => "Retur produse",
         _ => Type.ToString(),
     };
 }

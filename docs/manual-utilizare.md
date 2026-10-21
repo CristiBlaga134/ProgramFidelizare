@@ -182,6 +182,34 @@ corectura înseamnă anularea vânzării, care este operațiune de responsabil.
 
 ---
 
+### Clientul returnează produse (responsabil sau administrator)
+
+Butonul **„Retur”**, sus pe ecranul Casă, lângă „Client nou”:
+
+1. Tastați sau scanați **numărul bonului** și apăsați Enter. Apar clientul, suma
+   bonului, punctele primite și ce s-a returnat deja din el.
+2. Introduceți **valoarea produselor returnate**, așa cum apare pe documentul de
+   retur al casei de marcat. Dacă se returnează tot, apăsați **„Tot bonul”**.
+   Sub sumă vedeți dinainte câte puncte se vor retrage.
+3. Scrieți **motivul** (ce s-a returnat, numărul documentului de retur) și apăsați
+   **„Înregistrează returul”**. Clientul apare apoi pe ecran, cu soldul nou.
+
+Câteva lucruri bune de știut:
+
+- Punctele se retrag **proporțional** cu suma returnată. Dintr-un bon de 1000 de
+  lei cu 100 de puncte, un retur de 400 de lei retrage 40 de puncte.
+- Se pot face **mai multe retururi pe același bon**, câte unul la fiecare vizită
+  a clientului, până la valoarea bonului. Împreună nu retrag niciodată mai multe
+  puncte decât s-au acordat.
+- Suma returnată **iese și din rulajul pentru nivel**: un client nu rămâne Gold
+  pe bani returnați.
+- Dacă clientul a cheltuit deja punctele, soldul coboară la zero, dar nu devine
+  negativ, iar programul vă spune câte puncte nu au mai putut fi retrase.
+- Returul cere numărul bonului. Dacă vânzarea a fost trecută fără număr, returul
+  se face din fișa clientului (vezi mai jos).
+
+---
+
 ## 4. Înscrierea unui client nou
 
 Apăsați **Client nou**. Obligatorii sunt doar numele și prenumele.
@@ -217,6 +245,9 @@ puncte?”*. Arată tot drumul, nu doar rezultatul.
 
 - **Corecție de puncte** — adaugă sau scade puncte manual. Motivul este
   obligatoriu și rămâne în istoric.
+- **Retur din cumpărarea selectată** — același retur ca pe ecranul Casă, pornit
+  de la rândul ales în fila „Cumpărări”. Coloana „Stare” arată cât s-a returnat
+  din fiecare bon.
 - **Anularea unei cumpărări** — selectați rândul în fila „Cumpărări”, apoi
   apăsați butonul. Punctele acordate se retrag. Dacă între timp clientul le-a
   cheltuit, soldul coboară la zero, dar nu devine negativ — programul vă
@@ -417,6 +448,10 @@ Căutați-l după telefon sau după nume.
 **Am greșit suma pe un bon deja înregistrat.**
 Un responsabil anulează cumpărarea din fișa clientului, cu motiv, apoi o
 înregistrați corect.
+
+**Clientul a returnat un produs.**
+Nu anulați vânzarea: folosiți butonul „Retur” de pe ecranul Casă, cu numărul
+bonului și valoarea produsului returnat. Se retrag doar punctele aferente.
 
 **Clientul spune că avea mai multe puncte.**
 Deschideți fișa lui, fila „Istoricul punctelor”. Acolo scrie fiecare mișcare,

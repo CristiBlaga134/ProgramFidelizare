@@ -54,7 +54,7 @@ public interface IPurchaseRepository
 
     void Update(Purchase purchase);
 
-    /// <summary>Rulajul net al clientului începând cu data dată, fără cumpărările anulate.</summary>
+    /// <summary>Rulajul net al clientului începând cu data dată, fără cumpărările anulate și fără retururi.</summary>
     decimal GetNetSpendSince(int customerId, DateTime sinceInclusive);
 
     decimal GetLifetimeSpend(int customerId);
@@ -68,7 +68,17 @@ public interface IPurchaseRepository
 
     bool ReceiptNumberExists(string receiptNumber);
 
+    /// <summary>
+    /// Bonul cu numărul dat. Dacă numărul a fost refolosit după o anulare, întoarce
+    /// înregistrarea neanulată; dacă toate sunt anulate, pe cea mai recentă.
+    /// </summary>
+    Purchase? GetByReceiptNumber(string receiptNumber);
+
     IReadOnlyList<Purchase> GetBetween(DateTime fromInclusive, DateTime toExclusive);
+
+    int InsertReturn(PurchaseReturn purchaseReturn);
+
+    IReadOnlyList<PurchaseReturn> GetReturnsForPurchase(int purchaseId);
 }
 
 public interface IPointsRepository

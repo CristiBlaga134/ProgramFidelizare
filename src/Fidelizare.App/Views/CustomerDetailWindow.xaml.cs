@@ -30,6 +30,7 @@ public partial class CustomerDetailWindow : Window
         // Operațiunile care schimbă solduri sunt vizibile doar celor care le pot face.
         var visibility = user.CanManagePoints ? Visibility.Visible : Visibility.Collapsed;
         AdjustButton.Visibility = visibility;
+        ReturnButton.Visibility = visibility;
         VoidPurchaseButton.Visibility = visibility;
         VoidRedemptionButton.Visibility = visibility;
 
@@ -132,6 +133,23 @@ public partial class CustomerDetailWindow : Window
         }
     }
 
+    private void OnReturn(object sender, RoutedEventArgs e)
+    {
+        if (PurchasesGrid.SelectedItem is not Purchase purchase)
+        {
+            Dialogs.Info("Selectează întâi cumpărarea din care se face returul, din fila „Cumpărări”.");
+            return;
+        }
+
+        var dialog = new ReturnWindow(purchase) { Owner = this };
+
+        if (dialog.ShowDialog() == true)
+        {
+            DataChanged = true;
+            Load();
+        }
+    }
+
     private void OnVoidPurchase(object sender, RoutedEventArgs e)
     {
         if (PurchasesGrid.SelectedItem is not Purchase purchase)
@@ -149,7 +167,8 @@ public partial class CustomerDetailWindow : Window
         var prompt = new PromptWindow(
             "Anularea unei cumpărări",
             $"Cumpărare din {purchase.OccurredAt:dd.MM.yyyy}, {purchase.NetAmount:N2} lei, " +
-            $"{purchase.PointsEarned} puncte acordate.\n\n" +
+            $"{purchase.PointsEarned} puncte acordate" +
+            (purchase.HasReturns ? $", din care {purchase.PointsReturned} retrase deja prin retur" : "") + ".\n\n" +
             "Punctele acordate vor fi retrase. Dacă între timp au fost cheltuite, " +
             "soldul va fi adus la zero fără a deveni negativ.",
             "MOTIVUL ANULĂRII",

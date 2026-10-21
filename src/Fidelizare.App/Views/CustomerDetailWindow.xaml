@@ -115,16 +115,19 @@
                         <DataGridTextColumn Header="Puncte" Width="80" Binding="{Binding PointsEarned}" />
                         <DataGridTextColumn Header="Nivel" Width="90" Binding="{Binding TierAtPurchase}" />
                         <DataGridTextColumn Header="Operator" Width="*" Binding="{Binding RecordedByUserName}" />
-                        <DataGridTemplateColumn Header="Stare" Width="130">
+                        <DataGridTemplateColumn Header="Stare" Width="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock VerticalAlignment="Center">
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding StatusLabel}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock" BasedOn="{StaticResource BaseText}">
-                                                <Setter Property="Text" Value="" />
                                                 <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasReturns}" Value="True">
+                                                        <Setter Property="Foreground"
+                                                                Value="{StaticResource Warning}" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsVoided}" Value="True">
-                                                        <Setter Property="Text" Value="Anulată" />
                                                         <Setter Property="Foreground"
                                                                 Value="{StaticResource Danger}" />
                                                         <Setter Property="FontWeight" Value="SemiBold" />
@@ -211,6 +214,8 @@
                         Margin="0,0,8,0" Click="OnEdit" />
                 <Button x:Name="AdjustButton" Content="Corecție de puncte" Style="{StaticResource SecondaryButton}"
                         Margin="0,0,8,0" Click="OnAdjustPoints" />
+                <Button x:Name="ReturnButton" Content="Retur din cumpărarea selectată"
+                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Click="OnReturn" />
                 <Button x:Name="VoidPurchaseButton" Content="Anulează cumpărarea selectată"
                         Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Click="OnVoidPurchase" />
                 <Button x:Name="VoidRedemptionButton" Content="Anulează recompensa selectată"

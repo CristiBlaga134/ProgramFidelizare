@@ -14,7 +14,7 @@ namespace Fidelizare.Data.Sqlite;
 internal static class DatabaseSchema
 {
     /// <summary>Se mărește cu unu la fiecare modificare de structură, adăugând un pas în Migrate.</summary>
-    public const int CurrentVersion = 3;
+    public const int CurrentVersion = 4;
 
     public static void Initialize(SqliteConnection connection)
     {
@@ -43,6 +43,9 @@ internal static class DatabaseSchema
 
         if (version < 3)
             MergeUserNames(connection, transaction);
+
+        if (version < 4)
+            AddPurchaseReturns(connection, transaction);
 
         // Pașii următori se adaugă aici, fiecare sub propriul „if (version < N)”.
 
@@ -458,6 +461,39 @@ internal static class DatabaseSchema
         }
 
         Execute(connection, transaction, "ALTER TABLE Users DROP COLUMN DisplayName;");
+    }
+
+    /// <summary>
+    /// Pasul 4: retururile parțiale. Fiecare retur are propria înregistrare, iar pe
+    /// bon se țin totalurile, ca rulajul și nivelul să se calculeze fără a însuma
+    /// retururile la fiecare interogare. Bonurile existente pornesc fără retururi.
+    /// </summary>
+    private static void AddPurchaseReturns(SqliteConnection connection, SqliteTransaction transaction)
+    {
+        Execute(connection, transaction, """
+            ALTER TABLE Purchases ADD COLUMN ReturnedAmountBani INTEGER NOT NULL DEFAULT 0;
+            ALTER TABLE Purchases ADD COLUMN PointsReturned     INTEGER NOT NULL DEFAULT 0;
+            """);
+
+        Execute(connection, transaction, """
+            CREATE TABLE PurchaseReturns (
+                Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                PurchaseId      INTEGER NOT NULL REFERENCES Purchases (Id),
+                CustomerId      INTEGER NOT NULL REFERENCES Customers (Id),
+                AmountBani      INTEGER NOT NULL,
+                PointsReversed  INTEGER NOT NULL DEFAULT 0,
+                PointsShortfall INTEGER NOT NULL DEFAULT 0,
+                Reason          TEXT    NOT NULL,
+                OccurredAt      TEXT    NOT NULL,
+                UserId          INTEGER NULL,
+                UserName        TEXT    NULL,
+
+                CHECK (AmountBani > 0)
+            );
+
+            CREATE INDEX IX_Returns_Purchase ON PurchaseReturns (PurchaseId);
+            CREATE INDEX IX_Returns_Date     ON PurchaseReturns (OccurredAt);
+            """);
     }
 
     private static void Execute(SqliteConnection connection, SqliteTransaction transaction, string sql)

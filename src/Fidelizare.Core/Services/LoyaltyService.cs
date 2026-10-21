@@ -44,6 +44,27 @@ public sealed class RedeemRequest
     public string? ReceiptNumber { get; init; }
 }
 
+/// <summary>Datele necesare pentru returul unei părți dintr-un bon.</summary>
+public sealed class ReturnRequest
+{
+    public int PurchaseId { get; init; }
+
+    /// <summary>Valoarea produselor returnate, în lei.</summary>
+    public decimal Amount { get; init; }
+
+    public string Reason { get; init; } = string.Empty;
+}
+
+public sealed class ReturnOutcome
+{
+    public required PurchaseReturn Return { get; init; }
+    public required Purchase Purchase { get; init; }
+    public required CustomerSummary Summary { get; init; }
+
+    /// <summary>Adevărat dacă returul a epuizat bonul, care s-a închis ca anulat.</summary>
+    public bool FullyReturned { get; init; }
+}
+
 public sealed class RedemptionOutcome
 {
     public required Redemption Redemption { get; init; }
@@ -365,81 +386,13 @@ public sealed class LoyaltyService
             return OperationResult.Fail("Vânzarea este deja anulată.");
 
         var now = _clock.Now;
-        var toReverse = purchase.PointsEarned;
-        var shortfall = 0;
 
-        if (toReverse > 0)
-        {
-            // Întâi din loturile generate chiar de această vânzare.
-            var ownLots = uow.Points.GetLotsForPurchase(purchase.Id);
-            var consumed = new List<(PointLot Lot, int Points)>();
-            var remaining = toReverse;
+        // Punctele retrase deja prin retururi parțiale nu se mai retrag o dată.
+        var toReverse = Math.Max(0, purchase.PointsEarned - purchase.PointsReturned);
 
-            foreach (var lot in ownLots)
-            {
-                if (remaining <= 0) break;
-                var take = Math.Min(lot.PointsRemaining, remaining);
-                if (take <= 0) continue;
-
-                lot.PointsRemaining -= take;
-                uow.Points.UpdateLot(lot);
-                consumed.Add((lot, take));
-                remaining -= take;
-            }
-
-            // Restul, din loturile deschise, în ordinea expirării.
-            if (remaining > 0)
-            {
-                var ownIds = ownLots.Select(l => l.Id).ToHashSet();
-                foreach (var lot in uow.Points.GetOpenLots(purchase.CustomerId))
-                {
-                    if (remaining <= 0) break;
-                    if (ownIds.Contains(lot.Id)) continue;
-
-                    var take = Math.Min(lot.PointsRemaining, remaining);
-                    if (take <= 0) continue;
-
-                    lot.PointsRemaining -= take;
-                    uow.Points.UpdateLot(lot);
-                    consumed.Add((lot, take));
-                    remaining -= take;
-                }
-            }
-
-            shortfall = remaining;
-            var actuallyReversed = toReverse - shortfall;
-
-            if (actuallyReversed > 0)
-            {
-                var note = $"Anulare vânzare din {purchase.OccurredAt:dd.MM.yyyy}: {reason.Trim()}";
-                if (shortfall > 0)
-                    note += $" (nu s-au putut retrage {shortfall} puncte, deja consumate)";
-
-                var transactionId = uow.Points.InsertTransaction(new PointTransaction
-                {
-                    CustomerId = purchase.CustomerId,
-                    Type = PointTransactionType.ReversalOfEarning,
-                    Points = -actuallyReversed,
-                    BalanceAfter = uow.Points.GetBalance(purchase.CustomerId),
-                    PurchaseId = purchase.Id,
-                    OccurredAt = now,
-                    UserId = actor.Id,
-                    UserName = actor.Username,
-                    Note = note,
-                });
-
-                foreach (var (lot, points) in consumed)
-                {
-                    uow.Points.InsertConsumption(new PointLotConsumption
-                    {
-                        PointLotId = lot.Id,
-                        PointTransactionId = transactionId,
-                        Points = points,
-                        OccurredAt = now,
-                    });
-                }
-            }
-        }
+        var shortfall = RetractPurchasePoints(
+            uow, purchase, toReverse, PointTransactionType.ReversalOfEarning,
+            $"Anulare vânzare din {purchase.OccurredAt:dd.MM.yyyy}: {reason.Trim()}", actor, now);
 
         purchase.IsVoided = true;
         purchase.VoidedAt = now;
@@ -447,7 +400,7 @@ public sealed class LoyaltyService
         uow.Purchases.Update(purchase);
 
         WriteAudit(uow, actor, "PurchaseVoided", "Purchase", purchase.Id,
-            $"Net {purchase.NetAmount:0.##} lei, {purchase.PointsEarned} puncte retrase" +
+            $"Net {purchase.NetAmount:0.##} lei, {toReverse} puncte retrase" +
             (shortfall > 0 ? $" (lipsă {shortfall})" : "") + $". Motiv: {reason.Trim()}");
 
         uow.Commit();
@@ -457,6 +410,120 @@ public sealed class LoyaltyService
                 $"Vânzarea a fost anulată, dar {shortfall} puncte fuseseră deja consumate și nu au putut fi retrase. " +
                 "Soldul clientului a fost adus la zero.")
             : OperationResult.Ok();
+    }
+
+    // ---------------------------------------------------------------- Retururi
+
+    public Purchase? GetPurchase(int purchaseId)
+    {
+        using var uow = _factory.Create();
+        return uow.Purchases.GetById(purchaseId);
+    }
+
+    /// <summary>Bonul după numărul lui, pentru returul pornit de la casă cu bonul în mână.</summary>
+    public Purchase? FindPurchaseByReceipt(string receiptNumber)
+    {
+        if (string.IsNullOrWhiteSpace(receiptNumber))
+            return null;
+
+        using var uow = _factory.Create();
+        return uow.Purchases.GetByReceiptNumber(receiptNumber.Trim());
+    }
+
+    public IReadOnlyList<PurchaseReturn> GetReturns(int purchaseId)
+    {
+        using var uow = _factory.Create();
+        return uow.Purchases.GetReturnsForPurchase(purchaseId);
+    }
+
+    /// <summary>
+    /// Returul unei părți dintr-un bon, sau al întregului rest. Se retrag punctele
+    /// proporționale cu suma returnată, iar suma iese și din rulajul pe care se
+    /// calculează nivelul. Când tot bonul a fost returnat, bonul se închide ca
+    /// anulat, ca să nu mai conteze nici la numărul de cumpărături.
+    ///
+    /// Ca la anulare, dacă punctele au fost deja cheltuite, soldul coboară la zero
+    /// și nu devine negativ; diferența rămâne consemnată pe retur.
+    /// </summary>
+    public OperationResult<ReturnOutcome> ReturnPurchase(ReturnRequest request, AppUser actor)
+    {
+        if (!actor.CanManagePoints)
+            return OperationResult<ReturnOutcome>.Fail("Returul necesită drepturi de responsabil.");
+
+        if (string.IsNullOrWhiteSpace(request.Reason))
+            return OperationResult<ReturnOutcome>.Fail("Motivul returului este obligatoriu.");
+
+        var amount = Math.Round(request.Amount, 2, MidpointRounding.AwayFromZero);
+        if (amount <= 0)
+            return OperationResult<ReturnOutcome>.Fail("Suma returnată trebuie să fie mai mare decât zero.");
+
+        using var uow = _factory.Create();
+
+        var purchase = uow.Purchases.GetById(request.PurchaseId);
+        if (purchase is null)
+            return OperationResult<ReturnOutcome>.Fail("Vânzarea nu a fost găsită.");
+
+        if (purchase.IsVoided)
+            return OperationResult<ReturnOutcome>.Fail(
+                purchase.HasReturns && purchase.RemainingAmount == 0
+                    ? "Bonul a fost deja returnat integral."
+                    : "Vânzarea este anulată, nu se mai poate face retur pe ea.");
+
+        if (amount > purchase.RemainingAmount)
+            return OperationResult<ReturnOutcome>.Fail(
+                $"Suma returnată depășește ce a rămas din bon ({purchase.RemainingAmount:N2} lei).");
+
+        var now = _clock.Now;
+        var reason = request.Reason.Trim();
+        var points = PointsCalculator.PointsToReverseForReturn(purchase, amount);
+
+        var shortfall = RetractPurchasePoints(
+            uow, purchase, points, PointTransactionType.Return,
+            $"Retur {amount:0.##} lei din bonul din {purchase.OccurredAt:dd.MM.yyyy}: {reason}", actor, now);
+
+        var purchaseReturn = new PurchaseReturn
+        {
+            PurchaseId = purchase.Id,
+            CustomerId = purchase.CustomerId,
+            Amount = amount,
+            PointsReversed = points,
+            PointsShortfall = shortfall,
+            Reason = reason,
+            OccurredAt = now,
+            UserId = actor.Id,
+            UserName = actor.Username,
+        };
+
+        purchaseReturn.Id = uow.Purchases.InsertReturn(purchaseReturn);
+
+        purchase.ReturnedAmount += amount;
+        purchase.PointsReturned += points;
+
+        var fullyReturned = purchase.RemainingAmount == 0;
+        if (fullyReturned)
+        {
+            purchase.IsVoided = true;
+            purchase.VoidedAt = now;
+            purchase.VoidReason = $"Retur integral: {reason}";
+        }
+
+        uow.Purchases.Update(purchase);
+
+        WriteAudit(uow, actor, "PurchaseReturned", "Purchase", purchase.Id,
+            $"Retur {amount:0.##} lei din {purchase.NetAmount:0.##} lei, {points} puncte retrase" +
+            (shortfall > 0 ? $" (lipsă {shortfall})" : "") +
+            (fullyReturned ? ", bon returnat integral" : "") + $". Motiv: {reason}");
+
+        var summary = BuildSummary(uow, purchase.CustomerId)!;
+        uow.Commit();
+
+        return OperationResult<ReturnOutcome>.Ok(new ReturnOutcome
+        {
+            Return = purchaseReturn,
+            Purchase = purchase,
+            Summary = summary,
+            FullyReturned = fullyReturned,
+        });
     }
 
     // ------------------------------------------------------------ Recompense
@@ -915,6 +982,77 @@ public sealed class LoyaltyService
             UserName = actor.Username,
             Note = note,
         });
+    }
+
+    /// <summary>
+    /// Retrage punctele unei vânzări, la anulare sau la retur. Întâi din loturile
+    /// generate chiar de vânzare, apoi din celelalte loturi deschise, în ordinea
+    /// expirării. Ce nu se mai găsește în sold nu se retrage: soldul nu devine
+    /// negativ. Întoarce câte puncte au lipsit.
+    /// </summary>
+    private static int RetractPurchasePoints(
+        IUnitOfWork uow,
+        Purchase purchase,
+        int points,
+        PointTransactionType type,
+        string note,
+        AppUser actor,
+        DateTime at)
+    {
+        if (points <= 0)
+            return 0;
+
+        var ownLots = uow.Points.GetLotsForPurchase(purchase.Id);
+        var ownIds = ownLots.Select(l => l.Id).ToHashSet();
+        var candidates = ownLots.Concat(uow.Points.GetOpenLots(purchase.CustomerId).Where(l => !ownIds.Contains(l.Id)));
+
+        var consumed = new List<(PointLot Lot, int Points)>();
+        var remaining = points;
+
+        foreach (var lot in candidates)
+        {
+            if (remaining <= 0) break;
+            var take = Math.Min(lot.PointsRemaining, remaining);
+            if (take <= 0) continue;
+
+            lot.PointsRemaining -= take;
+            uow.Points.UpdateLot(lot);
+            consumed.Add((lot, take));
+            remaining -= take;
+        }
+
+        var reversed = points - remaining;
+        if (reversed <= 0)
+            return remaining;
+
+        if (remaining > 0)
+            note += $" (nu s-au putut retrage {remaining} puncte, deja consumate)";
+
+        var transactionId = uow.Points.InsertTransaction(new PointTransaction
+        {
+            CustomerId = purchase.CustomerId,
+            Type = type,
+            Points = -reversed,
+            BalanceAfter = uow.Points.GetBalance(purchase.CustomerId),
+            PurchaseId = purchase.Id,
+            OccurredAt = at,
+            UserId = actor.Id,
+            UserName = actor.Username,
+            Note = note,
+        });
+
+        foreach (var (lot, taken) in consumed)
+        {
+            uow.Points.InsertConsumption(new PointLotConsumption
+            {
+                PointLotId = lot.Id,
+                PointTransactionId = transactionId,
+                Points = taken,
+                OccurredAt = at,
+            });
+        }
+
+        return remaining;
     }
 
     /// <summary>

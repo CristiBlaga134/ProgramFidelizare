@@ -350,8 +350,8 @@ public sealed class DataTransferService
 
             var headers = new[]
             {
-                "Data", "Bon", "CodCard", "Client", "Valoare", "Reducere", "Incasat",
-                "Puncte", "Nivel", "Multiplicator", "Campanie", "Operator", "Anulata", "MotivAnulare",
+                "Data", "Bon", "CodCard", "Client", "Valoare", "Reducere", "Incasat", "Returnat",
+                "Puncte", "PuncteRetrase", "Nivel", "Multiplicator", "Campanie", "Operator", "Anulata", "MotivAnulare",
             };
 
             var rows = new List<IReadOnlyList<string?>>();
@@ -369,7 +369,9 @@ public sealed class DataTransferService
                     CsvFile.Money(purchase.GrossAmount),
                     CsvFile.Money(purchase.DiscountAmount),
                     CsvFile.Money(purchase.NetAmount),
+                    CsvFile.Money(purchase.ReturnedAmount),
                     purchase.PointsEarned.ToString(CultureInfo.CurrentCulture),
+                    purchase.PointsReturned.ToString(CultureInfo.CurrentCulture),
                     purchase.TierAtPurchase,
                     purchase.MultiplierApplied.ToString("0.##", CultureInfo.CurrentCulture),
                     purchase.CampaignName,

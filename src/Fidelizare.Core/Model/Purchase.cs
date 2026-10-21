@@ -49,4 +49,26 @@ public sealed class Purchase
     public DateTime? VoidedAt { get; set; }
 
     public string? VoidReason { get; set; }
+
+    /// <summary>Suma returnată până acum din acest bon, cumulat din toate retururile.</summary>
+    public decimal ReturnedAmount { get; set; }
+
+    /// <summary>
+    /// Punctele socotite deja retrase prin retururi, inclusiv cele care nu au mai
+    /// putut fi luate din sold fiindcă fuseseră cheltuite. Ține evidența, ca două
+    /// retururi pe același bon să nu retragă de două ori aceleași puncte.
+    /// </summary>
+    public int PointsReturned { get; set; }
+
+    /// <summary>Cât a rămas din bon după retururi. Baza pentru un retur următor.</summary>
+    public decimal RemainingAmount => Math.Max(0m, NetAmount - ReturnedAmount);
+
+    public bool HasReturns => ReturnedAmount > 0;
+
+    /// <summary>Starea bonului, pentru coloana din fișa clientului.</summary>
+    public string StatusLabel =>
+        IsVoided && HasReturns && RemainingAmount == 0 ? "Returnată integral"
+        : IsVoided ? "Anulată"
+        : HasReturns ? $"Retur {ReturnedAmount:N2} lei"
+        : string.Empty;
 }

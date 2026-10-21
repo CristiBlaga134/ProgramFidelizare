@@ -33,6 +33,11 @@ puncte are propria dată de expirare, iar la revendicare se consumă întâi cel
 care expiră cel mai devreme, ca să nu se piardă degeaba. La casă apare un
 avertisment când clientul are puncte aproape de expirare.
 
+**Retururi.** Când clientul aduce produse înapoi, se introduce numărul bonului
+și valoarea returnată. Punctele se retrag proporțional, iar suma iese și din
+rulajul pentru nivel. Pe același bon se pot face mai multe retururi, până la
+valoarea lui.
+
 **Campanii.** Perioade cu acumulare accelerată: puncte duble într-un weekend,
 ×1,5 toată luna decembrie, puncte triple în fiecare zi de marți. Se aplică peste
 multiplicatorul de nivel. Dacă mai multe se suprapun, se ia cea mai generoasă —
@@ -87,7 +92,7 @@ ProgramFidelizare.sln
 │   ├── Fidelizare.Data     Stocarea în SQLite: schemă, migrări, repository-uri.
 │   └── Fidelizare.App      Interfața WPF.
 ├── tests/
-│   └── Fidelizare.Tests    90 de teste: motorul de puncte, configurabilitatea, importul.
+│   └── Fidelizare.Tests    104 teste: motorul de puncte, retururile, configurabilitatea, importul.
 └── docs/
 ```
 

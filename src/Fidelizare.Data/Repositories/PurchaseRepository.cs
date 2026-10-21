@@ -10,7 +10,11 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
     private const string Columns =
         "Id, CustomerId, ReceiptNumber, GrossAmountBani, DiscountAmountBani, NetAmountBani, " +
         "PointsEarned, TierAtPurchase, MultiplierMilli, OccurredAt, RecordedByUserId, " +
-        "RecordedByUserName, IsVoided, VoidedAt, VoidReason, CampaignName, CampaignMultiplierMilli";
+        "RecordedByUserName, IsVoided, VoidedAt, VoidReason, CampaignName, CampaignMultiplierMilli, " +
+        "ReturnedAmountBani, PointsReturned";
+
+    private const string ReturnColumns =
+        "Id, PurchaseId, CustomerId, AmountBani, PointsReversed, PointsShortfall, Reason, OccurredAt, UserId, UserName";
 
     public PurchaseRepository(SqliteConnection connection, SqliteTransaction transaction)
         : base(connection, transaction)
@@ -48,11 +52,13 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
             INSERT INTO Purchases
                 (CustomerId, ReceiptNumber, GrossAmountBani, DiscountAmountBani, NetAmountBani,
                  PointsEarned, TierAtPurchase, MultiplierMilli, OccurredAt, RecordedByUserId,
-                 RecordedByUserName, IsVoided, VoidedAt, VoidReason, CampaignName, CampaignMultiplierMilli)
+                 RecordedByUserName, IsVoided, VoidedAt, VoidReason, CampaignName, CampaignMultiplierMilli,
+                 ReturnedAmountBani, PointsReturned)
             VALUES
                 (@customer, @receipt, @gross, @discount, @net,
                  @points, @tier, @multiplier, @occurred, @userId,
-                 @userName, @voided, @voidedAt, @voidReason, @campaign, @campaignMultiplier)
+                 @userName, @voided, @voidedAt, @voidReason, @campaign, @campaignMultiplier,
+                 @returned, @pointsReturned)
             RETURNING Id;
             """);
 
@@ -79,7 +85,9 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
                 VoidedAt           = @voidedAt,
                 VoidReason         = @voidReason,
                 CampaignName       = @campaign,
-                CampaignMultiplierMilli = @campaignMultiplier
+                CampaignMultiplierMilli = @campaignMultiplier,
+                ReturnedAmountBani = @returned,
+                PointsReturned     = @pointsReturned
             WHERE Id = @id;
             """);
 
@@ -90,10 +98,10 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
 
     public decimal GetNetSpendSince(int customerId, DateTime sinceInclusive)
     {
-        // Cumpărările anulate nu contează la calculul nivelului: altfel un bon
-        // stornat ar ține clientul artificial pe un nivel superior.
+        // Cumpărările anulate și sumele returnate nu contează la calculul nivelului:
+        // altfel un bon stornat ar ține clientul artificial pe un nivel superior.
         using var command = Command("""
-            SELECT IFNULL(SUM(NetAmountBani), 0)
+            SELECT IFNULL(SUM(NetAmountBani - ReturnedAmountBani), 0)
             FROM Purchases
             WHERE CustomerId = @customer AND IsVoided = 0 AND OccurredAt >= @since;
             """);
@@ -107,7 +115,7 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
     public decimal GetLifetimeSpend(int customerId)
     {
         using var command = Command("""
-            SELECT IFNULL(SUM(NetAmountBani), 0)
+            SELECT IFNULL(SUM(NetAmountBani - ReturnedAmountBani), 0)
             FROM Purchases
             WHERE CustomerId = @customer AND IsVoided = 0;
             """);
@@ -161,6 +169,22 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
         return ScalarInt(command) > 0;
     }
 
+    public Purchase? GetByReceiptNumber(string receiptNumber)
+    {
+        using var command = Command($"""
+            SELECT {Columns}
+            FROM Purchases
+            WHERE ReceiptNumber = @receipt
+            ORDER BY IsVoided, OccurredAt DESC, Id DESC
+            LIMIT 1;
+            """);
+
+        command.With("@receipt", receiptNumber);
+
+        using var reader = command.ExecuteReader();
+        return reader.Read() ? Map(reader) : null;
+    }
+
     public IReadOnlyList<Purchase> GetBetween(DateTime fromInclusive, DateTime toExclusive)
     {
         using var command = Command($"""
@@ -174,6 +198,62 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
         command.With("@to", Db.ToText(toExclusive));
 
         return ReadAll(command);
+    }
+
+    public int InsertReturn(PurchaseReturn purchaseReturn)
+    {
+        using var command = Command("""
+            INSERT INTO PurchaseReturns
+                (PurchaseId, CustomerId, AmountBani, PointsReversed, PointsShortfall, Reason, OccurredAt, UserId, UserName)
+            VALUES
+                (@purchase, @customer, @amount, @points, @shortfall, @reason, @occurred, @userId, @userName)
+            RETURNING Id;
+            """);
+
+        command.With("@purchase", purchaseReturn.PurchaseId);
+        command.With("@customer", purchaseReturn.CustomerId);
+        command.With("@amount", Db.ToBani(purchaseReturn.Amount));
+        command.With("@points", purchaseReturn.PointsReversed);
+        command.With("@shortfall", purchaseReturn.PointsShortfall);
+        command.With("@reason", purchaseReturn.Reason);
+        command.With("@occurred", Db.ToText(purchaseReturn.OccurredAt));
+        command.With("@userId", purchaseReturn.UserId);
+        command.With("@userName", purchaseReturn.UserName);
+
+        return ExecuteInsert(command);
+    }
+
+    public IReadOnlyList<PurchaseReturn> GetReturnsForPurchase(int purchaseId)
+    {
+        using var command = Command($"""
+            SELECT {ReturnColumns}
+            FROM PurchaseReturns
+            WHERE PurchaseId = @purchase
+            ORDER BY OccurredAt, Id;
+            """);
+
+        command.With("@purchase", purchaseId);
+
+        var results = new List<PurchaseReturn>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            results.Add(new PurchaseReturn
+            {
+                Id = reader.GetInt("Id"),
+                PurchaseId = reader.GetInt("PurchaseId"),
+                CustomerId = reader.GetInt("CustomerId"),
+                Amount = reader.GetMoney("AmountBani"),
+                PointsReversed = reader.GetInt("PointsReversed"),
+                PointsShortfall = reader.GetInt("PointsShortfall"),
+                Reason = reader.GetText("Reason"),
+                OccurredAt = reader.GetTimestamp("OccurredAt"),
+                UserId = reader.GetIntOrNull("UserId"),
+                UserName = reader.GetTextOrNull("UserName"),
+            });
+        }
+
+        return results;
     }
 
     private static List<Purchase> ReadAll(SqliteCommand command)
@@ -204,6 +284,8 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
         command.With("@voidReason", purchase.VoidReason);
         command.With("@campaign", purchase.CampaignName);
         command.With("@campaignMultiplier", Db.ToMilli(purchase.CampaignMultiplier));
+        command.With("@returned", Db.ToBani(purchase.ReturnedAmount));
+        command.With("@pointsReturned", purchase.PointsReturned);
     }
 
     private static Purchase Map(SqliteDataReader reader) => new()
@@ -225,5 +307,7 @@ internal sealed class PurchaseRepository : RepositoryBase, IPurchaseRepository
         VoidReason = reader.GetTextOrNull("VoidReason"),
         CampaignName = reader.GetTextOrNull("CampaignName"),
         CampaignMultiplier = reader.GetMilli("CampaignMultiplierMilli"),
+        ReturnedAmount = reader.GetMoney("ReturnedAmountBani"),
+        PointsReturned = reader.GetInt("PointsReturned"),
     };
 }

@@ -46,6 +46,28 @@ public class UserNameMigrationTests : IDisposable
                 );
 
                 CREATE UNIQUE INDEX IX_Users_Username ON Users (Username);
+
+                -- Pașii de după migrarea numelor modifică vânzările, deci tabelul
+                -- trebuie să existe, ca în orice bază reală de la versiunea 2.
+                CREATE TABLE Purchases (
+                    Id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                    CustomerId              INTEGER NOT NULL,
+                    ReceiptNumber           TEXT    NULL,
+                    GrossAmountBani         INTEGER NOT NULL,
+                    DiscountAmountBani      INTEGER NOT NULL DEFAULT 0,
+                    NetAmountBani           INTEGER NOT NULL,
+                    PointsEarned            INTEGER NOT NULL DEFAULT 0,
+                    TierAtPurchase          TEXT    NOT NULL DEFAULT '',
+                    MultiplierMilli         INTEGER NOT NULL DEFAULT 1000,
+                    OccurredAt              TEXT    NOT NULL,
+                    RecordedByUserId        INTEGER NULL,
+                    RecordedByUserName      TEXT    NULL,
+                    IsVoided                INTEGER NOT NULL DEFAULT 0,
+                    VoidedAt                TEXT    NULL,
+                    VoidReason              TEXT    NULL,
+                    CampaignName            TEXT    NULL,
+                    CampaignMultiplierMilli INTEGER NOT NULL DEFAULT 1000
+                );
                 """;
 
             create.ExecuteNonQuery();

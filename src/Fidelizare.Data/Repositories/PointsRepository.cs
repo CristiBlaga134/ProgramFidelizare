@@ -140,7 +140,7 @@ internal sealed class PointsRepository : RepositoryBase, IPointsRepository
     public int GetPointsEarnedSince(int customerId, DateTime sinceInclusive)
     {
         // Se numara doar miscarile care aduc puncte, plus retragerile pentru
-        // vanzari anulate, care sunt negative si scad singure din total.
+        // vanzari anulate si retururi, care sunt negative si scad singure din total.
         // Consumul pe recompense si expirarea raman in afara: nivelul reflecta
         // cat a acumulat clientul, nu cat i-a mai ramas.
         using var command = Command("""
@@ -148,7 +148,7 @@ internal sealed class PointsRepository : RepositoryBase, IPointsRepository
             FROM PointTransactions
             WHERE CustomerId = @customer
               AND OccurredAt >= @since
-              AND Type IN (1, 4, 6, 8, 9);
+              AND Type IN (1, 4, 6, 8, 9, 10);
             """);
 
         command.With("@customer", customerId);

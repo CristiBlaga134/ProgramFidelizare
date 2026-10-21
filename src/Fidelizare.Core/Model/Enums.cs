@@ -32,6 +32,9 @@ public enum PointTransactionType
 
     /// <summary>Bonus acordat de ziua de naștere.</summary>
     Birthday = 9,
+
+    /// <summary>Retur de produse: se retrag punctele aferente sumei returnate.</summary>
+    Return = 10,
 }
 
 /// <summary>Motivul pentru care a fost creat un lot de puncte.</summary>
