@@ -1,0 +1,235 @@
+﻿<UserControl x:Class="Fidelizare.App.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="26,22">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- ============================================== Antet ==== -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Rapoarte" Style="{StaticResource H1}" />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
+                               Text="Starea programului și cifrele perioadei selectate." />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <ComboBox x:Name="PeriodSelector" MinWidth="190" SelectionChanged="OnPeriodChanged">
+                        <ComboBoxItem Content="Astăzi" IsSelected="True" />
+                        <ComboBoxItem Content="Ultimele 7 zile" />
+                        <ComboBoxItem Content="Ultimele 30 de zile" />
+                        <ComboBoxItem Content="Luna curentă" />
+                        <ComboBoxItem Content="Anul curent" />
+                    </ComboBox>
+                    <Button Content="Reîmprospătează" Style="{StaticResource SecondaryButton}"
+                            Margin="10,0,0,0" Click="OnRefresh" />
+                </StackPanel>
+            </Grid>
+
+            <!-- ====================================== Starea programului ==== -->
+            <StackPanel Grid.Row="1" Margin="0,20,0,0">
+                <TextBlock Text="Starea programului" Style="{StaticResource H2}" />
+
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="CLIENȚI ÎNSCRIȘI" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="TotalCustomersText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="ActiveCustomersText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="ACTIVI ÎN ULTIMELE 90 DE ZILE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="RecentActiveText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="RecentShareText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="PUNCTE NEFOLOSITE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="OutstandingText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="LiabilityText" Style="{StaticResource Caption}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="6" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="EXPIRĂ ÎN 30 DE ZILE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="ExpiringText" Style="{StaticResource Metric}" />
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap"
+                                       Text="Ocazie de a chema clienții înapoi în magazin." />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Distribuția pe niveluri" Style="{StaticResource H3}" />
+                        <ItemsControl x:Name="TierList" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0" CornerRadius="12" Padding="10,3"
+                                                HorizontalAlignment="Left"
+                                                Background="{Binding ColorHex, Converter={StaticResource HexToBrush}}">
+                                            <TextBlock Text="{Binding TierName}" Foreground="White"
+                                                       FontSize="11" FontWeight="SemiBold" />
+                                        </Border>
+
+                                        <ProgressBar Grid.Column="1" Height="8" Margin="12,0"
+                                                     VerticalAlignment="Center"
+                                                     Minimum="0" Maximum="100"
+                                                     Value="{Binding SharePercent, Mode=OneWay}"
+                                                     Background="{StaticResource Bg}"
+                                                     Foreground="{Binding ColorHex, Converter={StaticResource HexToBrush}}"
+                                                     BorderThickness="0" />
+
+                                        <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                                   Text="{Binding Label}" Style="{StaticResource Caption}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- ============================================= Perioada ==== -->
+            <StackPanel Grid.Row="2" Margin="0,24,0,0">
+                <TextBlock x:Name="PeriodTitle" Text="Perioada selectată" Style="{StaticResource H2}" />
+
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="ÎNCASĂRI" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="NetSalesText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="GrossSalesText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="BONURI" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="PurchaseCountText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="AverageBasketText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="PUNCTE ACORDATE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="PointsIssuedText" Style="{StaticResource Metric}"
+                                       Foreground="{StaticResource Success}" />
+                            <TextBlock x:Name="NewCustomersText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="6" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="PUNCTE FOLOSITE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="PointsRedeemedText" Style="{StaticResource Metric}" />
+                            <TextBlock x:Name="RedemptionCountText" Style="{StaticResource Caption}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="8" Style="{StaticResource CardTight}">
+                        <StackPanel>
+                            <TextBlock Text="PUNCTE EXPIRATE" Style="{StaticResource FieldLabel}" />
+                            <TextBlock x:Name="PointsExpiredText" Style="{StaticResource Metric}"
+                                       Foreground="{StaticResource TextMuted}" />
+                            <TextBlock x:Name="VoidedText" Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+
+            <!-- ============================================ Top clienți ==== -->
+            <Border Grid.Row="3" Style="{StaticResource Card}" Margin="0,20,0,0">
+                <StackPanel>
+                    <TextBlock Text="Clienți cu cel mai mare rulaj în perioadă" Style="{StaticResource H2}" />
+
+                    <DataGrid x:Name="TopGrid" Margin="0,12,0,0" MaxHeight="320">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Client" Width="2*"
+                                                Binding="{Binding Customer.FullName}" />
+                            <DataGridTextColumn Header="Card" Width="110"
+                                                Binding="{Binding Customer.CardCode}" />
+                            <DataGridTextColumn Header="Nivel" Width="110" Binding="{Binding TierName}" />
+                            <DataGridTextColumn Header="Cumpărări" Width="110"
+                                                Binding="{Binding PurchaseCount}" />
+                            <DataGridTextColumn Header="Rulaj (lei)" Width="*"
+                                                Binding="{Binding Spend, StringFormat='N2'}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="EmptyTopText" Style="{StaticResource Muted}" Margin="0,10,0,0"
+                               Visibility="Collapsed"
+                               Text="Nicio cumpărare înregistrată în perioada selectată." />
+                </StackPanel>
+            </Border>
+
+            <!-- ============================================== Jurnal ==== -->
+            <Border Grid.Row="4" Style="{StaticResource Card}" Margin="0,20,0,24">
+                <StackPanel>
+                    <TextBlock Text="Operațiuni recente" Style="{StaticResource H2}" />
+                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
+                               Text="Corecții de puncte, anulări și modificări de reguli, cu autorul fiecăreia." />
+
+                    <DataGrid x:Name="AuditGrid" Margin="0,12,0,0" MaxHeight="300">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data" Width="140"
+                                                Binding="{Binding OccurredAt, StringFormat='dd.MM.yyyy HH:mm'}" />
+                            <DataGridTextColumn Header="Operator" Width="150" Binding="{Binding UserName}" />
+                            <DataGridTextColumn Header="Acțiune" Width="170" Binding="{Binding Action}" />
+                            <DataGridTextColumn Header="Detalii" Width="*" Binding="{Binding Details}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

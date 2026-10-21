@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>ProgramFidelizare</AssemblyName>
+    <RootNamespace>Fidelizare.App</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Datele care apar în proprietățile fișierului, în Windows. -->
+  <PropertyGroup>
+    <Product>Program de fidelizare</Product>
+    <AssemblyTitle>Program de fidelizare</AssemblyTitle>
+    <Description>Program de fidelizare pentru magazine de haine: puncte, niveluri și recompense.</Description>
+    <Version>1.0.0</Version>
+    <Copyright>© 2026</Copyright>
+    <NeutralLanguage>ro-RO</NeutralLanguage>
+  </PropertyGroup>
+
+  <!--
+      Setările de livrare.
+
+      Aplicația trebuie să ajungă la magazin ca un singur fișier care se
+      deschide cu dublu clic, pe un calculator pe care nu este instalat nimic.
+      De aceea:
+
+      · SelfContained include în executabil și platforma .NET, deci nu se cere
+        nicio instalare prealabilă;
+      · PublishSingleFile adună totul într-un fișier;
+      · IncludeNativeLibraries este necesar pentru motorul SQLite, care este o
+        bibliotecă nativă: fără această opțiune ar rămâne pe lângă executabil;
+      · EnableCompression reduce fișierul la aproximativ jumătate, cu un cost de
+        câteva zecimi de secundă la prima pornire.
+
+      Globalizarea rămâne pornită intenționat. Varianta invariantă ar reduce
+      fișierul, dar ar strica formatarea sumelor și a datelor în limba română.
+  -->
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fidelizare.Core\Fidelizare.Core.csproj" />
+    <ProjectReference Include="..\Fidelizare.Data\Fidelizare.Data.csproj" />
+  </ItemGroup>
+
+</Project>

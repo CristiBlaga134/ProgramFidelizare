@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+*.user
+.vs/
+
+# Baza de date locală și jurnalele generate la rulare.
+date/
+*.db
+*.db-shm
+*.db-wal
+erori.log

@@ -1,0 +1,112 @@
+﻿<Window x:Class="Fidelizare.App.Views.CustomerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Client"
+        Width="520" MinHeight="420"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+
+    <Grid Margin="28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock x:Name="TitleText" Text="Client nou" Style="{StaticResource H1}" />
+            <TextBlock x:Name="SubtitleText" Style="{StaticResource Muted}" Margin="0,4,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
+            <StackPanel>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="NUME *" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="LastNameBox" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="PRENUME *" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="FirstNameBox" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="TELEFON" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="PhoneBox" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
+                                   Text="A doua cale de identificare la casă." />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="DATA NAȘTERII" Style="{StaticResource FieldLabel}" />
+                        <DatePicker x:Name="BirthDatePicker" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
+                                   Text="Necesară pentru bonusul aniversar." />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="E-MAIL" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="EmailBox" />
+
+                <TextBlock Text="COD CARD" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="CardCodeBox" Grid.Column="0" />
+                    <Button Grid.Column="1" Content="Generează" Margin="8,0,0,0"
+                            Style="{StaticResource SecondaryButton}" Click="OnGenerateCard" />
+                </Grid>
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
+                           Text="Lăsat gol, se completează automat cu următorul cod liber." />
+
+                <StackPanel x:Name="CustomFieldsPanel" Margin="0,4,0,0" />
+
+                <TextBlock Text="OBSERVAȚII" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="NotesBox" Height="64" AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" />
+
+                <Border Style="{StaticResource Banner}" Margin="0,18,0,0">
+                    <StackPanel>
+                        <CheckBox x:Name="ConsentCheck" Content="Clientul acceptă comunicări comerciale" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="24,4,0,0" TextWrapping="Wrap"
+                                   Text="Bifează doar dacă acordul a fost exprimat efectiv. Punctele și recompensele funcționează și fără el." />
+                    </StackPanel>
+                </Border>
+
+                <CheckBox x:Name="ActiveCheck" Content="Client activ" IsChecked="True" Margin="0,16,0,0"
+                          Visibility="Collapsed" />
+
+                <Border x:Name="ErrorBanner" Background="{StaticResource DangerSoft}"
+                        CornerRadius="6" Padding="12,9" Margin="0,16,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="ErrorText" Foreground="{StaticResource Danger}" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Renunță" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                    IsCancel="True" Click="OnCancel" />
+            <Button x:Name="SaveButton" Content="Înscrie clientul" IsDefault="True"
+                    Click="OnSave" MinWidth="150" />
+        </StackPanel>
+    </Grid>
+</Window>

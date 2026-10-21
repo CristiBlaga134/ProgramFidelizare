@@ -1,0 +1,223 @@
+﻿<Window x:Class="Fidelizare.App.Views.CustomerDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Fișa clientului"
+        Height="740" Width="960"
+        MinHeight="480" MinWidth="820"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ============================================== Antet client ==== -->
+        <Border Grid.Row="0" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="NameText" Style="{StaticResource H1}" VerticalAlignment="Center" />
+                        <Border x:Name="TierBadge" CornerRadius="20" Padding="12,4" Margin="12,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock x:Name="TierText" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                        </Border>
+                        <Border x:Name="InactiveBadge" CornerRadius="20" Padding="12,4" Margin="8,0,0,0"
+                                Background="{StaticResource DangerSoft}" VerticalAlignment="Center"
+                                Visibility="Collapsed">
+                            <TextBlock Text="Dezactivat" Foreground="{StaticResource Danger}"
+                                       FontWeight="SemiBold" FontSize="12" />
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock x:Name="ContactText" Style="{StaticResource Muted}" Margin="0,6,0,0" />
+                    <TextBlock x:Name="EnrolledText" Style="{StaticResource Caption}" Margin="0,3,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock Text="PUNCTE DISPONIBILE" Style="{StaticResource FieldLabel}"
+                               HorizontalAlignment="Right" />
+                    <TextBlock x:Name="PointsText" Style="{StaticResource Metric}"
+                               Foreground="{DynamicResource Accent}" HorizontalAlignment="Right" />
+                    <TextBlock x:Name="PointsValueText" Style="{StaticResource Caption}"
+                               HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- =============================================== Indicatori ==== -->
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardTight}">
+                <StackPanel>
+                    <TextBlock Text="RULAJ ÎN PERIOADA DE CALIFICARE" Style="{StaticResource FieldLabel}" />
+                    <TextBlock x:Name="QualifyingText" Style="{StaticResource H2}" />
+                    <TextBlock x:Name="NextTierText" Style="{StaticResource Caption}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource CardTight}">
+                <StackPanel>
+                    <TextBlock Text="TOTAL DE LA ÎNSCRIERE" Style="{StaticResource FieldLabel}" />
+                    <TextBlock x:Name="LifetimeText" Style="{StaticResource H2}" />
+                    <TextBlock x:Name="PurchaseCountText" Style="{StaticResource Caption}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="4" Style="{StaticResource CardTight}">
+                <StackPanel>
+                    <TextBlock Text="ULTIMA CUMPĂRARE" Style="{StaticResource FieldLabel}" />
+                    <TextBlock x:Name="LastPurchaseText" Style="{StaticResource H2}" />
+                    <TextBlock x:Name="BirthdayText" Style="{StaticResource Caption}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="6" Style="{StaticResource CardTight}">
+                <StackPanel>
+                    <TextBlock Text="PUNCTE CARE EXPIRĂ" Style="{StaticResource FieldLabel}" />
+                    <TextBlock x:Name="ExpiringText" Style="{StaticResource H2}" />
+                    <TextBlock x:Name="ExpiryDateText" Style="{StaticResource Caption}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ==================================================== File ==== -->
+        <TabControl Grid.Row="2" Margin="0,14,0,0">
+
+            <TabItem Header="Cumpărări">
+                <DataGrid x:Name="PurchasesGrid" Margin="0,10,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Data" Width="130"
+                                            Binding="{Binding OccurredAt, StringFormat='dd.MM.yyyy HH:mm'}" />
+                        <DataGridTextColumn Header="Bon" Width="110" Binding="{Binding ReceiptNumber}" />
+                        <DataGridTextColumn Header="Valoare" Width="100"
+                                            Binding="{Binding GrossAmount, StringFormat='N2'}" />
+                        <DataGridTextColumn Header="Reducere" Width="100"
+                                            Binding="{Binding DiscountAmount, StringFormat='N2'}" />
+                        <DataGridTextColumn Header="Încasat" Width="110"
+                                            Binding="{Binding NetAmount, StringFormat='N2'}" />
+                        <DataGridTextColumn Header="Puncte" Width="80" Binding="{Binding PointsEarned}" />
+                        <DataGridTextColumn Header="Nivel" Width="90" Binding="{Binding TierAtPurchase}" />
+                        <DataGridTextColumn Header="Operator" Width="*" Binding="{Binding RecordedByUserName}" />
+                        <DataGridTemplateColumn Header="Stare" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BaseText}">
+                                                <Setter Property="Text" Value="" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsVoided}" Value="True">
+                                                        <Setter Property="Text" Value="Anulată" />
+                                                        <Setter Property="Foreground"
+                                                                Value="{StaticResource Danger}" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <TabItem Header="Recompense acordate">
+                <DataGrid x:Name="RedemptionsGrid" Margin="0,10,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Data" Width="130"
+                                            Binding="{Binding OccurredAt, StringFormat='dd.MM.yyyy HH:mm'}" />
+                        <DataGridTextColumn Header="Recompensă" Width="*" Binding="{Binding RewardName}" />
+                        <DataGridTextColumn Header="Puncte" Width="90" Binding="{Binding PointsSpent}" />
+                        <DataGridTextColumn Header="Valoare" Width="110"
+                                            Binding="{Binding DiscountValue, StringFormat='N2'}" />
+                        <DataGridTextColumn Header="Bon" Width="110" Binding="{Binding ReceiptNumber}" />
+                        <DataGridTextColumn Header="Operator" Width="150" Binding="{Binding UserName}" />
+                        <DataGridTemplateColumn Header="Stare" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BaseText}">
+                                                <Setter Property="Text" Value="" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsVoided}" Value="True">
+                                                        <Setter Property="Text" Value="Anulată" />
+                                                        <Setter Property="Foreground"
+                                                                Value="{StaticResource Danger}" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <TabItem Header="Istoricul punctelor">
+                <DataGrid x:Name="LedgerGrid" Margin="0,10,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Data" Width="130"
+                                            Binding="{Binding OccurredAt, StringFormat='dd.MM.yyyy HH:mm'}" />
+                        <DataGridTextColumn Header="Operațiune" Width="180" Binding="{Binding TypeLabel}" />
+                        <DataGridTemplateColumn Header="Puncte" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold"
+                                               Text="{Binding Points, Converter={StaticResource SignedPoints}}"
+                                               Foreground="{Binding Points, Converter={StaticResource PointsBrush}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Sold după" Width="90" Binding="{Binding BalanceAfter}" />
+                        <DataGridTextColumn Header="Detalii" Width="*" Binding="{Binding Note}" />
+                        <DataGridTextColumn Header="Operator" Width="150" Binding="{Binding UserName}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+
+        <!-- ================================================= Acțiuni ==== -->
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Content="Modifică datele" Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,8,0" Click="OnEdit" />
+                <Button x:Name="AdjustButton" Content="Corecție de puncte" Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,8,0" Click="OnAdjustPoints" />
+                <Button x:Name="VoidPurchaseButton" Content="Anulează cumpărarea selectată"
+                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Click="OnVoidPurchase" />
+                <Button x:Name="VoidRedemptionButton" Content="Anulează recompensa selectată"
+                        Style="{StaticResource SecondaryButton}" Click="OnVoidRedemption" />
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Închide" MinWidth="110" IsCancel="True" Click="OnClose" />
+        </Grid>
+    </Grid>
+</Window>

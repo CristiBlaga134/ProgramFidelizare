@@ -1,0 +1,110 @@
+﻿<Window x:Class="Fidelizare.App.Views.RewardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Recompensă"
+        Width="520" MinHeight="440"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+
+    <Grid Margin="26,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock x:Name="TitleText" Style="{StaticResource H2}" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Text="Beneficiul pe care clientul îl poate obține în schimbul punctelor." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,18,0,0">
+            <StackPanel>
+                <TextBlock Text="DENUMIRE *" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="NameBox" />
+
+                <TextBlock Text="DESCRIERE" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="DescriptionBox" Height="60" AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="COST ÎN PUNCTE *" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="PointsBox" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="TIPUL BENEFICIULUI" Style="{StaticResource FieldLabel}" />
+                        <ComboBox x:Name="KindBox" SelectionChanged="OnKindChanged">
+                            <ComboBoxItem Content="Reducere fixă în lei" IsSelected="True" />
+                            <ComboBoxItem Content="Reducere procentuală" />
+                            <ComboBoxItem Content="Produs gratuit" />
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="ValueLabel" Text="VALOARE (LEI)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="ValueBox" />
+                <TextBlock x:Name="ValueHint" Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" />
+
+                <StackPanel x:Name="MaxDiscountPanel" Visibility="Collapsed">
+                    <TextBlock Text="PLAFONUL REDUCERII (LEI)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                    <TextBox x:Name="MaxDiscountBox" />
+                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Zero înseamnă fără plafon. Util ca o reducere procentuală să nu devină foarte mare pe un bon mare." />
+                </StackPanel>
+
+                <TextBlock Text="VALOAREA MINIMĂ A BONULUI (LEI)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="MinPurchaseBox" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Zero înseamnă că recompensa poate fi folosită la orice bon." />
+
+                <TextBlock Text="NIVEL MINIM NECESAR" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <ComboBox x:Name="TierBox" DisplayMemberPath="Name" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Alege „Toate nivelurile” dacă recompensa este disponibilă tuturor clienților." />
+
+                <Grid Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="VALABILĂ DE LA" Style="{StaticResource FieldLabel}" />
+                        <DatePicker x:Name="FromPicker" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="VALABILĂ PÂNĂ LA" Style="{StaticResource FieldLabel}" />
+                        <DatePicker x:Name="ToPicker" />
+                    </StackPanel>
+                </Grid>
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Lăsate goale, recompensa este valabilă permanent. Utile pentru campanii sezoniere." />
+
+                <CheckBox x:Name="ActiveCheck" Content="Recompensă activă" IsChecked="True" Margin="0,16,0,0" />
+
+                <Border x:Name="ErrorBanner" Background="{StaticResource DangerSoft}"
+                        CornerRadius="6" Padding="10,7" Margin="0,14,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="ErrorText" Foreground="{StaticResource Danger}" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Renunță" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                    IsCancel="True" Click="OnCancel" />
+            <Button Content="Salvează" IsDefault="True" Click="OnSave" MinWidth="120" />
+        </StackPanel>
+    </Grid>
+</Window>

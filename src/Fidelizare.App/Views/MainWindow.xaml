@@ -1,0 +1,71 @@
+﻿<Window x:Class="Fidelizare.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Program de fidelizare"
+        Height="820" Width="1320"
+        MinHeight="560" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="228" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================================ Bara laterală ==== -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBg}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="20,24,20,20">
+                    <Image x:Name="LogoImage" MaxHeight="56" MaxWidth="188" Stretch="Uniform"
+                           HorizontalAlignment="Left" Margin="0,0,0,12" Visibility="Collapsed" />
+                    <TextBlock x:Name="ProgramNameText" Text="Club Fidelitate"
+                               FontSize="16" FontWeight="SemiBold" Foreground="White"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="StoreNameText" Text="Magazinul meu"
+                               FontSize="11.5" Foreground="{StaticResource SidebarMuted}"
+                               Margin="0,3,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1">
+                    <RadioButton x:Name="NavPos" Style="{StaticResource NavButton}"
+                                 Content="Casă" IsChecked="True" Checked="OnNavigate" Tag="pos" />
+                    <RadioButton x:Name="NavCustomers" Style="{StaticResource NavButton}"
+                                 Content="Clienți" Checked="OnNavigate" Tag="customers" />
+                    <RadioButton x:Name="NavReports" Style="{StaticResource NavButton}"
+                                 Content="Rapoarte" Checked="OnNavigate" Tag="reports" />
+                    <RadioButton x:Name="NavAdmin" Style="{StaticResource NavButton}"
+                                 Content="Administrare" Checked="OnNavigate" Tag="admin" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Margin="20,0,20,20">
+                    <Border Background="{StaticResource SidebarHover}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock x:Name="UserNameText" Foreground="White"
+                                       FontSize="12.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="UserRoleText" Foreground="{StaticResource SidebarMuted}"
+                                       FontSize="11" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Button x:Name="StaffAccountsButton" Content="Conturile personalului"
+                            Style="{StaticResource SidebarLinkButton}"
+                            Margin="0,8,0,0" Click="OnStaffAccounts" />
+                    <Button Content="Schimbă parola" Style="{StaticResource SidebarLinkButton}"
+                            Click="OnChangePassword" />
+                    <Button Content="Ieși din cont" Style="{StaticResource SidebarLinkButton}"
+                            Click="OnSignOut" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ================================================ Conținut ==== -->
+        <ContentControl x:Name="ViewHost" Grid.Column="1" />
+    </Grid>
+</Window>

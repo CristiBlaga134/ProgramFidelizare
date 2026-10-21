@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Fidelizare.App/Fidelizare.App.csproj" />
+    <Project Path="src/Fidelizare.Core/Fidelizare.Core.csproj" />
+    <Project Path="src/Fidelizare.Data/Fidelizare.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Fidelizare.Tests/Fidelizare.Tests.csproj" />
+  </Folder>
+</Solution>

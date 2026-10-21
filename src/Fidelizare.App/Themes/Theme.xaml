@@ -1,0 +1,506 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!--
+        Paleta aplicației. Culorile sunt puține și cu roluri clare: fundal, suprafață,
+        text, accent și cele trei semnale (reușită, atenție, pericol). Un program
+        folosit toată ziua la casă trebuie să fie liniștit, nu colorat.
+    -->
+    <Color x:Key="AccentColor">#3B5BDB</Color>
+    <Color x:Key="AccentDarkColor">#2F49AF</Color>
+
+    <SolidColorBrush x:Key="Bg"            Color="#F4F5F8" />
+    <SolidColorBrush x:Key="Surface"       Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SurfaceAlt"    Color="#FAFBFC" />
+    <SolidColorBrush x:Key="Border"        Color="#E1E4EA" />
+    <SolidColorBrush x:Key="BorderStrong"  Color="#C8CDD6" />
+
+    <SolidColorBrush x:Key="Text"          Color="#171B24" />
+    <SolidColorBrush x:Key="TextMuted"     Color="#69707D" />
+    <SolidColorBrush x:Key="TextFaint"     Color="#9AA1AD" />
+    <SolidColorBrush x:Key="TextOnAccent"  Color="#FFFFFF" />
+
+    <SolidColorBrush x:Key="Accent"        Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentDark"    Color="{StaticResource AccentDarkColor}" />
+    <SolidColorBrush x:Key="AccentSoft"    Color="#EBEFFC" />
+
+    <SolidColorBrush x:Key="Success"       Color="#15803D" />
+    <SolidColorBrush x:Key="SuccessSoft"   Color="#E7F6EC" />
+    <SolidColorBrush x:Key="Warning"       Color="#B45309" />
+    <SolidColorBrush x:Key="WarningSoft"   Color="#FDF3E3" />
+    <SolidColorBrush x:Key="Danger"        Color="#C0272D" />
+    <SolidColorBrush x:Key="DangerSoft"    Color="#FCECEC" />
+
+    <SolidColorBrush x:Key="SidebarBg"     Color="#1B2233" />
+    <SolidColorBrush x:Key="SidebarText"   Color="#C9D0DE" />
+    <SolidColorBrush x:Key="SidebarActive" Color="#2B3752" />
+    <!-- Textul secundar de pe bara laterală. Suficient de deschis cât să rămână
+         lizibil pe fundalul întunecat, dar mai stins decât textul principal. -->
+    <SolidColorBrush x:Key="SidebarMuted"  Color="#A3ABBD" />
+    <SolidColorBrush x:Key="SidebarHover"  Color="#232C42" />
+
+    <sys:Double x:Key="RadiusValue">6</sys:Double>
+    <CornerRadius x:Key="Radius">6</CornerRadius>
+    <CornerRadius x:Key="RadiusLarge">10</CornerRadius>
+
+    <FontFamily x:Key="UiFont">Segoe UI</FontFamily>
+
+    <!-- ============================================================ Text ==== -->
+
+    <!--
+        Stilul de bază NU fixează culoarea textului, iar asta este intenționat.
+
+        Un stil implicit de TextBlock se aplică și blocurilor de text pe care WPF
+        le creează singur în interiorul butoanelor și al altor controale, pentru
+        conținutul lor. Dacă ar fixa aici culoarea închisă, ea ar învinge culoarea
+        moștenită de la control — iar un buton cu text alb, așezat pe bara laterală
+        întunecată, ar ajunge să scrie cu negru pe bleumarin, adică invizibil.
+
+        Culoarea implicită este stabilită o singură dată, pe fereastră (mai jos),
+        de unde se moștenește normal. Astfel orice control care își schimbă culoarea
+        textului o transmite corect conținutului său.
+    -->
+    <Style TargetType="TextBlock" x:Key="BaseText">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+    </Style>
+
+    <Style TargetType="TextBlock" BasedOn="{StaticResource BaseText}" />
+
+    <Style TargetType="TextBlock" x:Key="H1" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="23" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="H2" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="H3" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="Muted" BasedOn="{StaticResource BaseText}">
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="Caption" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+    </Style>
+
+    <!-- Eticheta de deasupra unui câmp de formular. -->
+    <Style TargetType="TextBlock" x:Key="FieldLabel" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <!-- Numărul mare dintr-un indicator: sold de puncte, total zilnic. -->
+    <Style TargetType="TextBlock" x:Key="Metric" BasedOn="{StaticResource BaseText}">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- ========================================================== Butoane ==== -->
+
+    <Style TargetType="Button" x:Key="ButtonBase">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.88" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.75" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Acțiunea principală a ecranului. Una singură per ecran. -->
+    <Style TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+        <Setter Property="Foreground" Value="{StaticResource TextOnAccent}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="SecondaryButton" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="GhostButton" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="MinHeight" Value="26" />
+    </Style>
+
+    <!-- Buton discret pentru bara laterală întunecată: text deschis, fără fundal. -->
+    <Style TargetType="Button" x:Key="SidebarLinkButton" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource SidebarMuted}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="2,4" />
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="Button" x:Key="DangerButton" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="{StaticResource Danger}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- Butonul mare de la casă: se apasă de sute de ori pe zi. -->
+    <Style TargetType="Button" x:Key="BigButton" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+        <Setter Property="Foreground" Value="{StaticResource TextOnAccent}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="MinHeight" Value="46" />
+        <Setter Property="Padding" Value="20,10" />
+    </Style>
+
+    <!-- ========================================================== Câmpuri ==== -->
+
+    <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="9,7" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource Accent}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius}">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Bg}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextFaint}" />
+                        </Trigger>
+                        <Trigger Property="IsReadOnly" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource SurfaceAlt}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Câmpul de căutare de la casă: mai mare, pentru că e primul lucru atins. -->
+    <Style TargetType="TextBox" x:Key="SearchBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="Padding" Value="12,9" />
+    </Style>
+
+    <!-- Câmpurile de sume: cifre mari, aliniate la dreapta, ca pe bon. -->
+    <Style TargetType="TextBox" x:Key="AmountBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="TextAlignment" Value="Right" />
+        <Setter Property="Padding" Value="12,9" />
+    </Style>
+
+    <Style TargetType="PasswordBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="9,7" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius}">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style TargetType="DatePicker">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="6,0,0,0" />
+    </Style>
+
+    <!-- ============================================================ Carduri === -->
+
+    <Style TargetType="Border" x:Key="Card">
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="CardTight" BasedOn="{StaticResource Card}">
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <!-- Bandă de informare: neutră, de reușită, de atenție sau de eroare. -->
+    <Style TargetType="Border" x:Key="Banner">
+        <Setter Property="CornerRadius" Value="{StaticResource Radius}" />
+        <Setter Property="Padding" Value="12,9" />
+        <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+    </Style>
+
+    <Style TargetType="Separator">
+        <Setter Property="Background" Value="{StaticResource Border}" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="0,10" />
+    </Style>
+
+    <!-- ============================================================ Liste ===== -->
+
+    <Style TargetType="DataGrid">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="RowBackground" Value="{StaticResource Surface}" />
+        <Setter Property="AlternatingRowBackground" Value="{StaticResource SurfaceAlt}" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource Border}" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="SelectionUnit" Value="FullRow" />
+        <Setter Property="RowHeight" Value="34" />
+        <Setter Property="ColumnHeaderHeight" Value="34" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="Background" Value="{StaticResource SurfaceAlt}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+                <Setter Property="Foreground" Value="{StaticResource Text}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SurfaceAlt}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+    <!-- ============================================================ Taburi ==== -->
+
+    <Style TargetType="TabControl">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0,14,0,0" />
+    </Style>
+
+    <Style TargetType="TabItem">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Root"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0,0,0,2"
+                            Padding="14,9">
+                        <ContentPresenter ContentSource="Header" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Text}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ========================================================= Navigație ==== -->
+
+    <!-- Butoanele din bara laterală: se comportă ca file, dar arată ca o listă. -->
+    <Style TargetType="RadioButton" x:Key="NavButton">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Foreground" Value="{StaticResource SidebarText}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="8,2" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Root"
+                            Background="Transparent"
+                            CornerRadius="{StaticResource Radius}"
+                            Padding="14,10">
+                        <ContentPresenter VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource SidebarHover}" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource SidebarActive}" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ========================================================== Ferestre ==== -->
+
+    <Style TargetType="Window">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="Background" Value="{StaticResource Bg}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        <!-- Culoarea implicită a textului, de unde se moștenește în tot cuprinsul ferestrei. -->
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
+    </Style>
+
+    <Style TargetType="ScrollViewer">
+        <Setter Property="PanningMode" Value="VerticalOnly" />
+    </Style>
+
+</ResourceDictionary>

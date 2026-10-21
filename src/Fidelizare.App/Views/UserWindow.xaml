@@ -1,0 +1,76 @@
+﻿<Window x:Class="Fidelizare.App.Views.UserWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cont de utilizator"
+        Width="470" MinHeight="420"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+
+    <Grid Margin="26,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock x:Name="TitleText" Style="{StaticResource H2}" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Text="Conturile separate fac posibil să se știe cine a operat fiecare vânzare, recompensă sau corecție." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,18,0,0">
+            <StackPanel>
+                <TextBlock Text="NUME *" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="NameBox" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Cu acest nume se autentifică persoana și tot el apare în rapoarte și în jurnal. Minimum 3 caractere." />
+
+                <TextBlock Text="ROL" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <ComboBox x:Name="RoleBox">
+                    <ComboBoxItem Content="Casier" IsSelected="True" />
+                    <ComboBoxItem Content="Responsabil" />
+                    <ComboBoxItem Content="Administrator" />
+                </ComboBox>
+
+                <Border Style="{StaticResource Banner}" Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap"
+                                   Text="Casier: caută clienți, înregistrează vânzări, acordă recompense." />
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,3,0,0"
+                                   Text="Responsabil: în plus, corecții de puncte, anulări și acces la rapoarte." />
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,3,0,0"
+                                   Text="Administrator: în plus, regulile programului și gestiunea conturilor." />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel x:Name="PasswordPanel">
+                    <TextBlock Text="PAROLĂ *" Style="{StaticResource FieldLabel}" Margin="0,16,0,4" />
+                    <PasswordBox x:Name="PasswordBox" />
+
+                    <TextBlock Text="CONFIRMĂ PAROLA *" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                    <PasswordBox x:Name="ConfirmBox" />
+
+                    <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Text="Minimum 8 caractere, cu cel puțin o literă și o cifră." />
+                </StackPanel>
+
+                <CheckBox x:Name="ActiveCheck" Content="Cont activ" IsChecked="True" Margin="0,16,0,0" />
+                <TextBlock Style="{StaticResource Caption}" Margin="24,4,0,0" TextWrapping="Wrap"
+                           Text="Un cont dezactivat nu se mai poate autentifica, dar rămâne în istoricul operațiunilor." />
+
+                <Border x:Name="ErrorBanner" Background="{StaticResource DangerSoft}"
+                        CornerRadius="6" Padding="10,7" Margin="0,14,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="ErrorText" Foreground="{StaticResource Danger}" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Renunță" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                    IsCancel="True" Click="OnCancel" />
+            <Button Content="Salvează" IsDefault="True" Click="OnSave" MinWidth="120" />
+        </StackPanel>
+    </Grid>
+</Window>

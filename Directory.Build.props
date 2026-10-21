@@ -1,0 +1,20 @@
+﻿<Project>
+
+  <!--
+      Setări comune tuturor proiectelor din soluție.
+
+      Simbolurile de depanare se scriu în interiorul bibliotecilor, nu în fișiere
+      .pdb separate. Fără asta, publicarea ar lăsa câteva fișiere pe lângă
+      executabil, iar livrarea nu ar mai fi un singur fișier. Informația rămâne
+      disponibilă, deci un raport de eroare arată în continuare linia exactă.
+  -->
+  <PropertyGroup>
+    <DebugType>embedded</DebugType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <Company>Program de fidelizare</Company>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+</Project>

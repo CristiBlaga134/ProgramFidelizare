@@ -1,0 +1,71 @@
+﻿<Window x:Class="Fidelizare.App.Views.TierWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nivel"
+        Width="470" MinHeight="420"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+
+    <Grid Margin="26,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock x:Name="TitleText" Style="{StaticResource H2}" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Text="Nivelul se atribuie automat, după rulajul clientului din perioada de calificare." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,18,0,0">
+            <StackPanel>
+                <TextBlock Text="DENUMIRE *" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="NameBox" />
+
+                <TextBlock Text="PRAG DE RULAJ (LEI)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="MinSpendBox" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Rulajul minim din perioada de calificare pentru a intra pe acest nivel. Primul nivel trebuie să aibă pragul zero." />
+
+                <TextBlock Text="MULTIPLICATOR DE PUNCTE" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="MultiplierBox" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="1 înseamnă acumulare standard, 1,25 înseamnă cu 25% mai multe puncte." />
+
+                <TextBlock Text="REDUCERE PERMANENTĂ (%)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="StandingBox" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Informativ: se afișează la casă ca beneficiu al nivelului, dar reducerea se aplică manual pe bon." />
+
+                <TextBlock Text="CULOARE (#RRGGBB)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ColorBox" Grid.Column="0" TextChanged="OnColorChanged" />
+                    <Border x:Name="ColorPreview" Grid.Column="1" Width="44" Margin="8,0,0,0"
+                            CornerRadius="6" BorderBrush="{StaticResource Border}" BorderThickness="1" />
+                </Grid>
+
+                <TextBlock Text="BENEFICII (TEXT AFIȘAT LA CASĂ)" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                <TextBox x:Name="BenefitsBox" Height="70" AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" />
+
+                <Border x:Name="ErrorBanner" Background="{StaticResource DangerSoft}"
+                        CornerRadius="6" Padding="10,7" Margin="0,14,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="ErrorText" Foreground="{StaticResource Danger}" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Renunță" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                    IsCancel="True" Click="OnCancel" />
+            <Button Content="Salvează" IsDefault="True" Click="OnSave" MinWidth="120" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="Fidelizare.App.Views.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="26,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Clienți" Style="{StaticResource H1}" />
+                <TextBlock x:Name="CountText" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Client nou" VerticalAlignment="Bottom" Click="OnNew" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="SearchInput" Grid.Column="0"
+                     Text="Caută după nume, telefon sau cod de card"
+                     TextChanged="OnSearchChanged" GotFocus="OnSearchGotFocus" />
+
+            <CheckBox x:Name="IncludeInactive" Grid.Column="1" Content="Arată și clienții dezactivați"
+                      Margin="16,0,0,0" VerticalAlignment="Center" Click="OnFilterChanged" />
+
+            <Button Grid.Column="2" Content="Reîmprospătează" Style="{StaticResource SecondaryButton}"
+                    Margin="12,0,0,0" Click="OnRefresh" />
+        </Grid>
+
+        <DataGrid x:Name="Grid" Grid.Row="2" Margin="0,14,0,0" MouseDoubleClick="OnRowDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nume" Width="2*" Binding="{Binding FullName}" />
+                <DataGridTextColumn Header="Card" Width="100" Binding="{Binding CardCode}" />
+                <DataGridTextColumn Header="Telefon" Width="120" Binding="{Binding Phone}" />
+
+                <DataGridTemplateColumn Header="Nivel" Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="12" Padding="10,3" HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding TierColor, Converter={StaticResource HexToBrush}}">
+                                <TextBlock Text="{Binding TierName}" Foreground="White"
+                                           FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Puncte" Width="90" Binding="{Binding Points}" />
+                <DataGridTextColumn Header="Rulaj calificare" Width="130"
+                                    Binding="{Binding QualifyingValue, StringFormat='N2'}" />
+                <DataGridTextColumn Header="Total cheltuit" Width="130"
+                                    Binding="{Binding LifetimeSpend, StringFormat='N2'}" />
+                <DataGridTextColumn Header="Cumpărări" Width="90" Binding="{Binding PurchaseCount}" />
+                <DataGridTextColumn Header="Ultima" Width="*" Binding="{Binding LastPurchaseLabel}" />
+            </DataGrid.Columns>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource TextFaint}" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SurfaceAlt}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,14,0,0">
+            <Button Content="Deschide fișa" Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,8,0" Click="OnOpen" />
+            <Button Content="Modifică datele" Style="{StaticResource SecondaryButton}" Click="OnEdit" />
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="16,0,0,0"
+                       Text="Dublu clic pe un rând deschide fișa completă." />
+        </StackPanel>
+    </Grid>
+</UserControl>
