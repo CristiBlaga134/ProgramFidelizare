@@ -10,3 +10,6 @@ date/
 *.db-shm
 *.db-wal
 erori.log
+
+# Programul de instalare compilat.
+installer/Output/

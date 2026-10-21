@@ -127,6 +127,28 @@ Rezultă `publish/ProgramFidelizare.exe`, aproximativ 60 MB, care conține și
 platforma .NET și motorul SQLite. Acesta este singurul fișier care trebuie
 trimis magazinului.
 
+## Programul de instalare
+
+Pentru magazinele care preferă o instalare obișnuită, cu scurtătură în meniul
+Start și dezinstalare din Setări, există un installer făcut cu
+[Inno Setup 6](https://jrsoftware.org/isdl.php):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
+```
+
+Scriptul publică executabilul și compilează `installer\ProgramFidelizare.iss`.
+Rezultă `installer\Output\ProgramFidelizare-Setup-<versiune>.exe`, cu versiunea
+luată din proiect.
+
+Installerul pune programul în `Program Files` și datele în
+`C:\ProgramData\ProgramFidelizare`, un folder comun în care pot scrie toți
+utilizatorii Windows ai calculatorului. Altfel, dacă cei din magazin intră în
+Windows cu conturi diferite, fiecare ar vedea altă bază de date. Legătura o face
+un `fidelizare.config` scris lângă executabil, care nu se suprascrie la
+actualizare. O versiune nouă se instalează peste cea veche fără să atingă
+datele, iar dezinstalarea nu le șterge.
+
 ---
 
 ## Prima pornire
