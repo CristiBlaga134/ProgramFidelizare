@@ -115,6 +115,12 @@ vânzări scad suma returnată. Când tot bonul a fost returnat, bonul se închi
 anulat, ca să nu mai conteze nici la numărul de cumpărături. O anulare după un
 retur parțial retrage doar punctele rămase.
 
+Returul îl poate face și casierul, spre deosebire de anulare și de corecțiile
+de puncte. Clientul vine cu produsele în programul magazinului, iar responsabilul
+poate lipsi; a-l trimite acasă ar fi mai rău decât riscul. Riscul rămâne mic:
+returul poate doar scădea puncte, niciodată adăuga, nu poate depăși valoarea
+bonului, iar operatorul rămâne trecut pe retur și în jurnal.
+
 Rapoartele atribuie returul zilei vânzării, nu zilei returului: vânzările unei
 zile trecute pot scădea după un retur făcut mai târziu.
 

@@ -127,11 +127,11 @@ public class ReturnTests
     }
 
     [Fact]
-    public void Casierul_nu_poate_face_retur()
+    public void Casierul_poate_face_retur_si_ramane_trecut_ca_operator()
     {
         using var env = new TestEnvironment();
         var customer = env.Enroll();
-        var purchase = env.Buy(customer.Id, 100m);
+        var purchase = env.Buy(customer.Id, 100m); // 10 puncte
 
         var result = env.Loyalty.ReturnPurchase(new ReturnRequest
         {
@@ -140,8 +140,11 @@ public class ReturnTests
             Reason = "Mărime greșită",
         }, env.Cashier);
 
-        Assert.False(result.Success);
-        Assert.Contains("responsabil", result.Error!);
+        Assert.True(result.Success, result.Error);
+        Assert.Equal(55, env.Balance(customer.Id));
+
+        var stored = Assert.Single(env.Loyalty.GetReturns(purchase.Id));
+        Assert.Equal(env.Cashier.Id, stored.UserId);
     }
 
     [Fact]

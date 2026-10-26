@@ -56,7 +56,7 @@ această informație nu ar valora nimic.
 
 | Rol | Ce poate face |
 |---|---|
-| **Casier** | Caută clienți, îi înscrie, înregistrează vânzări, acordă recompense. |
+| **Casier** | Caută clienți, îi înscrie, înregistrează vânzări, acordă recompense, face retururi. |
 | **Responsabil** | În plus: corecții de puncte, anulări de vânzări și recompense, rapoarte, catalogul de recompense. |
 | **Administrator** | În plus: regulile programului, nivelurile, conturile personalului, copiile de siguranță. |
 
@@ -182,7 +182,7 @@ corectura înseamnă anularea vânzării, care este operațiune de responsabil.
 
 ---
 
-### Clientul returnează produse (responsabil sau administrator)
+### Clientul returnează produse
 
 Butonul **„Retur”**, sus pe ecranul Casă, lângă „Client nou”:
 
@@ -205,6 +205,9 @@ Câteva lucruri bune de știut:
   pe bani returnați.
 - Dacă clientul a cheltuit deja punctele, soldul coboară la zero, dar nu devine
   negativ, iar programul vă spune câte puncte nu au mai putut fi retrase.
+- Returul îl poate face **orice cont, inclusiv casierul**, ca un client să nu
+  aștepte responsabilul. Numele celui care a făcut returul rămâne în istoricul
+  clientului și în jurnalul de operațiuni.
 - Returul cere numărul bonului. Dacă vânzarea a fost trecută fără număr, returul
   se face din fișa clientului (vezi mai jos).
 
@@ -241,13 +244,14 @@ Dublu clic pe un rând deschide **fișa completă**, unde găsiți:
 Fila „Istoricul punctelor” este răspunsul la întrebarea *„de ce am atâtea
 puncte?”*. Arată tot drumul, nu doar rezultatul.
 
+Butonul **„Retur din cumpărarea selectată”** face același retur ca pe ecranul
+Casă, pornit de la rândul ales în fila „Cumpărări”. Îl poate folosi oricine,
+inclusiv casierul. Coloana „Stare” arată cât s-a returnat din fiecare bon.
+
 ### Corecții și anulări (responsabil sau administrator)
 
 - **Corecție de puncte** — adaugă sau scade puncte manual. Motivul este
   obligatoriu și rămâne în istoric.
-- **Retur din cumpărarea selectată** — același retur ca pe ecranul Casă, pornit
-  de la rândul ales în fila „Cumpărări”. Coloana „Stare” arată cât s-a returnat
-  din fiecare bon.
 - **Anularea unei cumpărări** — selectați rândul în fila „Cumpărări”, apoi
   apăsați butonul. Punctele acordate se retrag. Dacă între timp clientul le-a
   cheltuit, soldul coboară la zero, dar nu devine negativ — programul vă

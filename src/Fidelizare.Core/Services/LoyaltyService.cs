@@ -444,12 +444,13 @@ public sealed class LoyaltyService
     ///
     /// Ca la anulare, dacă punctele au fost deja cheltuite, soldul coboară la zero
     /// și nu devine negativ; diferența rămâne consemnată pe retur.
+    ///
+    /// Spre deosebire de anulare, returul îl poate face și casierul: clientul vine
+    /// cu produsele când e deschis magazinul, iar responsabilul poate să nu fie
+    /// acolo. Operatorul rămâne trecut pe retur și în jurnalul de operațiuni.
     /// </summary>
     public OperationResult<ReturnOutcome> ReturnPurchase(ReturnRequest request, AppUser actor)
     {
-        if (!actor.CanManagePoints)
-            return OperationResult<ReturnOutcome>.Fail("Returul necesită drepturi de responsabil.");
-
         if (string.IsNullOrWhiteSpace(request.Reason))
             return OperationResult<ReturnOutcome>.Fail("Motivul returului este obligatoriu.");
 

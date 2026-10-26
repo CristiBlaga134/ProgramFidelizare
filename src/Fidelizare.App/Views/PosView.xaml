@@ -29,7 +29,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Button x:Name="ReturnButton" Content="Retur" Style="{StaticResource SecondaryButton}"
+                <Button Content="Retur" Style="{StaticResource SecondaryButton}"
                         Click="OnReturn" Margin="0,0,8,0" />
                 <Button Content="Client nou" Style="{StaticResource SecondaryButton}"
                         Click="OnNewCustomer" Margin="0,0,8,0" />

@@ -30,7 +30,6 @@ public partial class CustomerDetailWindow : Window
         // Operațiunile care schimbă solduri sunt vizibile doar celor care le pot face.
         var visibility = user.CanManagePoints ? Visibility.Visible : Visibility.Collapsed;
         AdjustButton.Visibility = visibility;
-        ReturnButton.Visibility = visibility;
         VoidPurchaseButton.Visibility = visibility;
         VoidRedemptionButton.Visibility = visibility;
 

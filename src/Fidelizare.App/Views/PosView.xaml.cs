@@ -21,16 +21,11 @@ public partial class PosView : UserControl, IRefreshable
 
         // Câmpul de căutare primește focalizarea la intrarea pe ecran, ca un card
         // scanat să ajungă direct acolo fără să fie nevoie de mouse.
-        Loaded += (_, _) =>
-        {
-            UpdatePermissions();
-            SearchInput.Focus();
-        };
+        Loaded += (_, _) => SearchInput.Focus();
     }
 
     public void Refresh()
     {
-        UpdatePermissions();
         _model.ReloadRules();
         _model.ReloadCustomer();
         SearchInput.Focus();
@@ -64,12 +59,6 @@ public partial class PosView : UserControl, IRefreshable
 
         e.Handled = true;
     }
-
-    /// <summary>Returul schimbă solduri, deci butonul apare doar celor care îl pot face.</summary>
-    private void UpdatePermissions() =>
-        ReturnButton.Visibility = AppServices.Current.CurrentUser?.CanManagePoints == true
-            ?Visibility.Visible
-            : Visibility.Collapsed;
 
     /// <summary>Clientul vine cu bonul: returul se caută după numărul lui, iar apoi clientul apare pe ecran.</summary>
     private void OnReturn(object sender, RoutedEventArgs e)
