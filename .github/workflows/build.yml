@@ -1,0 +1,30 @@
+# Compilează soluția și rulează testele la fiecare push și pull request.
+# Rulează pe Windows: interfața este WPF și nu se compilează pe alt sistem.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurare pachete
+        run: dotnet restore
+
+      - name: Compilare
+        run: dotnet build --no-restore -c Release
+
+      - name: Teste
+        run: dotnet test --no-build -c Release --logger "console;verbosity=normal"

@@ -1,0 +1,58 @@
+# Publică o versiune nouă: la o etichetă de forma v1.0.1, rulează testele,
+# compilează installerul și îl pune la Releases, de unde îl descarcă magazinele.
+#
+#   git tag v1.0.1
+#   git push origin v1.0.1
+#
+# Eticheta trebuie să corespundă versiunii din Fidelizare.App.csproj, altfel
+# installerul ar purta alt număr decât cel din eticheta versiunii.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Verificare versiune
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'.TrimStart('v')
+          $version = (dotnet msbuild src/Fidelizare.App/Fidelizare.App.csproj -getProperty:Version).Trim()
+          if ($tag -ne $version) {
+            Write-Error "Eticheta v$tag nu corespunde versiunii din proiect ($version). Schimbă <Version> în proiect sau eticheta."
+            exit 1
+          }
+          Write-Host "Versiunea $version"
+
+      - name: Teste
+        run: dotnet test -c Release
+
+      - name: Instalare Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Compilare installer
+        shell: pwsh
+        run: ./installer/build-installer.ps1
+
+      - name: Publicare la Releases
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $setup = Get-ChildItem installer/Output/ProgramFidelizare-Setup-*.exe | Select-Object -First 1
+          gh release create $tag $setup.FullName --title "Program de fidelizare $tag" --generate-notes
