@@ -43,6 +43,7 @@ OutputBaseFilename=ProgramFidelizare-Setup-{#AppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\src\Fidelizare.App\Assets\app.ico
 UninstallDisplayIcon={app}\{#AppExeName}
 UninstallDisplayName={#AppName}
 ; La actualizare, programul deschis se închide singur, ca executabilul să poată

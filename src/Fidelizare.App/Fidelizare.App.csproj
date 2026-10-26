@@ -8,6 +8,14 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>ProgramFidelizare</AssemblyName>
     <RootNamespace>Fidelizare.App</RootNamespace>
+
+    <!--
+        Icoana executabilului. Ferestrele nu au icoană proprie, deci o preiau pe
+        aceasta, la fel ca bara de activități. Dimensiunile mici (16–48) sunt
+        decupate mai strâns pe emblemă, ca să rămână lizibile; sursa mare este
+        Assets/app-512.png.
+    -->
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- Datele care apar în proprietățile fișierului, în Windows. -->
