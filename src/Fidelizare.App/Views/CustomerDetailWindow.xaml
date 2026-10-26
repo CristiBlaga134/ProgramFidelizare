@@ -209,20 +209,26 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Content="Modifică datele" Style="{StaticResource SecondaryButton}"
-                        Margin="0,0,8,0" Click="OnEdit" />
+            <!-- Butoanele trec pe rândul următor când fereastra e îngustă. -->
+            <WrapPanel Grid.Column="0">
+                <Button x:Name="EditButton" Content="Modifică datele" Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,8,8" Click="OnEdit" />
                 <Button x:Name="AdjustButton" Content="Corecție de puncte" Style="{StaticResource SecondaryButton}"
-                        Margin="0,0,8,0" Click="OnAdjustPoints" />
+                        Margin="0,0,8,8" Click="OnAdjustPoints" />
                 <Button x:Name="ReturnButton" Content="Retur din cumpărarea selectată"
-                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Click="OnReturn" />
+                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" Click="OnReturn" />
                 <Button x:Name="VoidPurchaseButton" Content="Anulează cumpărarea selectată"
-                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Click="OnVoidPurchase" />
+                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" Click="OnVoidPurchase" />
                 <Button x:Name="VoidRedemptionButton" Content="Anulează recompensa selectată"
-                        Style="{StaticResource SecondaryButton}" Click="OnVoidRedemption" />
-            </StackPanel>
+                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" Click="OnVoidRedemption" />
+                <Button x:Name="ExportDataButton" Content="Exportă datele clientului"
+                        Style="{StaticResource GhostButton}" Margin="0,0,8,8" Click="OnExportData" />
+                <Button x:Name="AnonymizeButton" Content="Anonimizează clientul"
+                        Style="{StaticResource DangerButton}" Margin="0,0,8,8" Click="OnAnonymize" />
+            </WrapPanel>
 
-            <Button Grid.Column="1" Content="Închide" MinWidth="110" IsCancel="True" Click="OnClose" />
+            <Button Grid.Column="1" Content="Închide" MinWidth="110" IsCancel="True" Click="OnClose"
+                    VerticalAlignment="Top" />
         </Grid>
     </Grid>
 </Window>

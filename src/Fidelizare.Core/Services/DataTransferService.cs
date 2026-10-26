@@ -273,6 +273,98 @@ public sealed class DataTransferService
 
     // ============================================================== Export
 
+    /// <summary>
+    /// Toate datele păstrate despre un client, într-un fișier text care se poate da
+    /// clientului: răspunsul la o cerere de acces (GDPR, art. 15). Cuprinde datele
+    /// personale, acordul de marketing, câmpurile proprii, soldul, cumpărăturile,
+    /// recompensele și istoricul punctelor.
+    /// </summary>
+    public OperationResult ExportCustomerData(int customerId, string path)
+    {
+        try
+        {
+            using var uow = _factory.Create();
+
+            var customer = uow.Customers.GetById(customerId);
+            if (customer is null)
+                return OperationResult.Fail("Clientul nu a fost găsit.");
+
+            var text = new System.Text.StringBuilder();
+            void Line(string label, string? value) => text.AppendLine($"{label,-28}{(string.IsNullOrWhiteSpace(value) ? "-" : value)}");
+            void Heading(string title) => text.AppendLine().AppendLine(title.ToUpper(CultureInfo.CurrentCulture)).AppendLine(new string('-', title.Length));
+
+            var rules = LoyaltyRules.Load(uow.Settings);
+
+            text.AppendLine($"Datele păstrate de {rules.StoreName} în programul „{rules.ProgramName}”");
+            text.AppendLine($"Generat pe {_clock.Now:dd.MM.yyyy HH:mm}");
+
+            Heading("Date personale");
+            Line("Nume", customer.LastName);
+            Line("Prenume", customer.FirstName);
+            Line("Telefon", customer.Phone);
+            Line("E-mail", customer.Email);
+            Line("Data nașterii", CsvFile.Date(customer.BirthDate));
+            Line("Cod card", customer.CardCode);
+            Line("Înscris pe", CsvFile.DateTimeText(customer.EnrolledAt));
+            Line("Cont activ", customer.IsActive ? "da" : "nu");
+            Line("Observații", customer.Notes);
+
+            Heading("Comunicări comerciale");
+            Line("Acord", customer.MarketingConsent ? "da" : "nu");
+            Line("Exprimat pe", CsvFile.DateTimeText(customer.ConsentAt));
+
+            var values = uow.CustomFields.GetValues(customer.Id);
+            var definitions = uow.CustomFields.GetDefinitions(includeInactive: true);
+            if (values.Count > 0)
+            {
+                Heading("Alte informații");
+                foreach (var definition in definitions)
+                {
+                    if (values.TryGetValue(definition.Id, out var value) && !string.IsNullOrWhiteSpace(value))
+                        Line(definition.Label, value);
+                }
+            }
+
+            Heading("Puncte");
+            Line("Sold actual", uow.Points.GetBalance(customer.Id).ToString(CultureInfo.CurrentCulture));
+
+            var purchases = uow.Purchases.GetForCustomer(customer.Id, int.MaxValue);
+            Heading($"Cumpărături ({purchases.Count})");
+            foreach (var p in purchases)
+            {
+                var status = p.StatusLabel.Length > 0 ? $" · {p.StatusLabel}" : string.Empty;
+                text.AppendLine(
+                    $"{CsvFile.DateTimeText(p.OccurredAt)}  bon {p.ReceiptNumber ?? "-"}  " +
+                    $"{CsvFile.Money(p.NetAmount)} lei  {p.PointsEarned} puncte{status}");
+            }
+
+            var redemptions = uow.Redemptions.GetForCustomer(customer.Id, int.MaxValue);
+            Heading($"Recompense ({redemptions.Count})");
+            foreach (var r in redemptions)
+            {
+                text.AppendLine(
+                    $"{CsvFile.DateTimeText(r.OccurredAt)}  {r.RewardName}  {r.PointsSpent} puncte  " +
+                    $"{CsvFile.Money(r.DiscountValue)} lei{(r.IsVoided ? " · anulată" : string.Empty)}");
+            }
+
+            var ledger = uow.Points.GetTransactions(customer.Id, int.MaxValue);
+            Heading($"Istoricul punctelor ({ledger.Count})");
+            foreach (var t in ledger.OrderBy(t => t.OccurredAt).ThenBy(t => t.Id))
+            {
+                text.AppendLine(
+                    $"{CsvFile.DateTimeText(t.OccurredAt)}  {t.TypeLabel,-24}{t.Points,7:+#;-#;0}  " +
+                    $"sold {t.BalanceAfter}  {t.Note}");
+            }
+
+            File.WriteAllText(path, text.ToString(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+            return OperationResult.Ok();
+        }
+        catch (Exception ex)
+        {
+            return OperationResult.Fail($"Exportul nu a reușit: {ex.Message}");
+        }
+    }
+
     public OperationResult<int> ExportCustomers(string path)
     {
         try

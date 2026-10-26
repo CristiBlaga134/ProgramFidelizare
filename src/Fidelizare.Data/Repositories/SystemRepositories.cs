@@ -225,6 +225,19 @@ internal sealed class AuditRepository : RepositoryBase, IAuditRepository
         return ReadAll(command);
     }
 
+    public int ReplaceInDetails(string find, string replacement)
+    {
+        using var command = Command("""
+            UPDATE AuditLog
+            SET Details = REPLACE(Details, @find, @replacement)
+            WHERE INSTR(Details, @find) > 0;
+            """);
+
+        command.With("@find", find);
+        command.With("@replacement", replacement);
+        return command.ExecuteNonQuery();
+    }
+
     public IReadOnlyList<AuditEntry> GetBetween(DateTime fromInclusive, DateTime toExclusive)
     {
         using var command = Command($"""

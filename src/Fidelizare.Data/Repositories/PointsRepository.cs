@@ -157,6 +157,20 @@ internal sealed class PointsRepository : RepositoryBase, IPointsRepository
         return Math.Max(0, ScalarInt(command));
     }
 
+    public int ReplaceInNotes(int customerId, string find, string replacement)
+    {
+        using var command = Command("""
+            UPDATE PointTransactions
+            SET Note = REPLACE(Note, @find, @replacement)
+            WHERE CustomerId = @customer AND INSTR(Note, @find) > 0;
+            """);
+
+        command.With("@customer", customerId);
+        command.With("@find", find);
+        command.With("@replacement", replacement);
+        return command.ExecuteNonQuery();
+    }
+
     public IReadOnlyList<PointLot> GetLotsForPurchase(int purchaseId)
     {
         using var command = Command($"""

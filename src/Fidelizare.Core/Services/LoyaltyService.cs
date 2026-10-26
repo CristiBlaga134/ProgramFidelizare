@@ -258,6 +258,120 @@ public sealed class LoyaltyService
         return OperationResult.Ok();
     }
 
+    /// <summary>Clienții anonimizați primesc acest prefix în locul codului de card.</summary>
+    public const string AnonymizedCardPrefix = "ANON-";
+
+    /// <summary>
+    /// Anonimizează un client, la cererea lui de ștergere a datelor (GDPR, art. 17).
+    ///
+    /// Clientul nu se șterge: cumpărăturile lui fac parte din rapoartele magazinului
+    /// și din calculul punctelor altor perioade. Se șterg în schimb toate datele care
+    /// îl identifică: numele, telefonul, e-mailul, data nașterii, observațiile,
+    /// câmpurile proprii și codul de card. Numele dispare și din jurnalul de
+    /// operațiuni și din notele istoricului de puncte, unde fusese scris ca text.
+    /// Punctele rămase se anulează, fiindcă nu mai are cine să le folosească.
+    ///
+    /// Operațiunea nu se poate desface, deci o face doar administratorul.
+    /// </summary>
+    public OperationResult AnonymizeCustomer(int customerId, string reason, AppUser actor)
+    {
+        if (!actor.CanConfigureProgram)
+            return OperationResult.Fail("Anonimizarea unui client necesită drepturi de administrator.");
+
+        if (string.IsNullOrWhiteSpace(reason))
+            return OperationResult.Fail("Motivul anonimizării este obligatoriu, de exemplu data cererii clientului.");
+
+        using var uow = _factory.Create();
+
+        var customer = uow.Customers.GetById(customerId);
+        if (customer is null)
+            return OperationResult.Fail("Clientul nu a fost găsit.");
+
+        if (customer.CardCode.StartsWith(AnonymizedCardPrefix, StringComparison.OrdinalIgnoreCase))
+            return OperationResult.Fail("Clientul este deja anonimizat.");
+
+        var now = _clock.Now;
+        var placeholder = $"Client anonimizat #{customer.Id}";
+
+        // Textele de căutat în jurnal, de la cel mai lung la cel mai scurt, ca „Popescu
+        // Ioana” să fie înlocuit întreg înainte ca vreo bucată din el să fie atinsă.
+        var identifying = new[]
+            {
+                customer.FullName,
+                $"{customer.FirstName} {customer.LastName}".Trim(),
+                customer.Phone,
+                customer.Email,
+                customer.CardCode,
+            }
+            .Where(t => !string.IsNullOrWhiteSpace(t) && t!.Trim().Length >= 4)
+            .Select(t => t!.Trim())
+            .Distinct()
+            .OrderByDescending(t => t.Length)
+            .ToList();
+
+        var balance = uow.Points.GetBalance(customer.Id);
+        if (balance > 0)
+        {
+            var consumed = ConsumeLots(uow, customer.Id, balance);
+
+            var transactionId = uow.Points.InsertTransaction(new PointTransaction
+            {
+                CustomerId = customer.Id,
+                Type = PointTransactionType.AdjustmentMinus,
+                Points = -balance,
+                BalanceAfter = uow.Points.GetBalance(customer.Id),
+                OccurredAt = now,
+                UserId = actor.Id,
+                UserName = actor.Username,
+                Note = "Puncte anulate la anonimizarea clientului",
+            });
+
+            foreach (var (lot, taken) in consumed)
+            {
+                uow.Points.InsertConsumption(new PointLotConsumption
+                {
+                    PointLotId = lot.Id,
+                    PointTransactionId = transactionId,
+                    Points = taken,
+                    OccurredAt = now,
+                });
+            }
+        }
+
+        foreach (var text in identifying)
+        {
+            uow.Audit.ReplaceInDetails(text, placeholder);
+            uow.Points.ReplaceInNotes(customer.Id, text, placeholder);
+        }
+
+        customer.LastName = "Client anonimizat";
+        customer.FirstName = $"#{customer.Id}";
+        customer.CardCode = AnonymizedCardPrefix + customer.Id;
+        customer.Phone = null;
+        customer.Email = null;
+        customer.BirthDate = null;
+        customer.Notes = null;
+        customer.MarketingConsent = false;
+        customer.ConsentAt = null;
+        customer.LastBirthdayBonusYear = null;
+        customer.IsActive = false;
+        customer.CustomValues.Clear();
+
+        uow.Customers.Update(customer);
+        uow.CustomFields.SetValues(customer.Id, customer.CustomValues);
+
+        // Motivul se scrie așa cum l-a dat administratorul; interfața cere ca el să
+        // nu conțină numele clientului.
+        WriteAudit(uow, actor, "CustomerAnonymized", "Customer", customer.Id,
+            $"{placeholder}, {balance} puncte anulate. Motiv: {reason.Trim()}");
+
+        uow.Commit();
+        return OperationResult.Ok();
+    }
+
+    public static bool IsAnonymized(Customer customer) =>
+        customer.CardCode.StartsWith(AnonymizedCardPrefix, StringComparison.OrdinalIgnoreCase);
+
     // -------------------------------------------------------------- Vânzări
 
     /// <summary>
@@ -1207,12 +1321,12 @@ public sealed class LoyaltyService
         return null;
     }
 
-    private static void WriteAudit(
+    private void WriteAudit(
         IUnitOfWork uow, AppUser? actor, string action, string? entityType, int? entityId, string? details)
     {
         uow.Audit.Insert(new AuditEntry
         {
-            OccurredAt = DateTime.Now,
+            OccurredAt = _clock.Now,
             UserId = actor?.Id,
             UserName = actor?.Username,
             Action = action,

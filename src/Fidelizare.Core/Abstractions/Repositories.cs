@@ -123,6 +123,12 @@ public interface IPointsRepository
 
     /// <summary>Detaliul pe loturi al unei mișcări de consum, folosit la anulări.</summary>
     IReadOnlyList<PointLotConsumption> GetConsumptionsForTransaction(int transactionId);
+
+    /// <summary>
+    /// Înlocuiește un text în notele mișcărilor unui client. Folosit la anonimizare,
+    /// pentru numele scrise de personal în motivul unei corecții.
+    /// </summary>
+    int ReplaceInNotes(int customerId, string find, string replacement);
 }
 
 public interface IRewardRepository
@@ -199,6 +205,13 @@ public interface IAuditRepository
     IReadOnlyList<AuditEntry> GetRecent(int take = 500);
 
     IReadOnlyList<AuditEntry> GetBetween(DateTime fromInclusive, DateTime toExclusive);
+
+    /// <summary>
+    /// Înlocuiește un text în detaliile jurnalului. Folosit la anonimizare: jurnalul
+    /// scrie numele clientului la vânzări și înscrieri, iar după o cerere de ștergere
+    /// numele nu trebuie să rămână nici acolo.
+    /// </summary>
+    int ReplaceInDetails(string find, string replacement);
 }
 
 public interface ICampaignRepository

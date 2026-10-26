@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
+using Microsoft.Win32;
 using Fidelizare.App.Infrastructure;
 using Fidelizare.Core.Model;
 using Fidelizare.Core.Services;
@@ -32,6 +33,11 @@ public partial class CustomerDetailWindow : Window
         AdjustButton.Visibility = visibility;
         VoidPurchaseButton.Visibility = visibility;
         VoidRedemptionButton.Visibility = visibility;
+
+        // Datele personale: exportul la responsabil, anonimizarea (ireversibilă)
+        // doar la administrator.
+        ExportDataButton.Visibility = visibility;
+        AnonymizeButton.Visibility = user.CanConfigureProgram ? Visibility.Visible : Visibility.Collapsed;
 
         Load();
     }
@@ -70,6 +76,12 @@ public partial class CustomerDetailWindow : Window
         ContactText.Text = string.Join("  ·  ", contact);
         EnrolledText.Text = $"Înscris pe {customer.EnrolledAt:dd.MM.yyyy}" +
                             (customer.MarketingConsent ? " · acord pentru comunicări comerciale" : string.Empty);
+
+        // Un client anonimizat nu mai are ce modifica: datele lui au fost șterse.
+        var anonymized = LoyaltyService.IsAnonymized(customer);
+        EditButton.IsEnabled = !anonymized;
+        AnonymizeButton.IsEnabled = !anonymized;
+        ExportDataButton.IsEnabled = !anonymized;
 
         PointsText.Text = _summary.PointsBalance.ToString();
         PointsValueText.Text = $"≈ {PointsCalculator.EstimateValue(_summary.PointsBalance, rules):N2} lei";
@@ -232,6 +244,79 @@ public partial class CustomerDetailWindow : Window
         else
             Dialogs.Info("Recompensa a fost anulată și punctele au fost restituite.");
 
+        Load();
+    }
+
+    /// <summary>Cererea de acces a clientului: tot ce se păstrează despre el, într-un fișier text.</summary>
+    private void OnExportData(object sender, RoutedEventArgs e)
+    {
+        if (_summary is null)
+            return;
+
+        var dialog = new SaveFileDialog
+        {
+            Title = "Salvează datele clientului",
+            FileName = $"date-client-{_summary.Customer.CardCode}.txt",
+            Filter = "Text (*.txt)|*.txt",
+            AddExtension = true,
+        };
+
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        var result = AppServices.Current.Transfer.ExportCustomerData(_customerId, dialog.FileName);
+
+        if (result.Failed)
+            Dialogs.Error(result.Error!);
+        else
+            Dialogs.Info($"Datele clientului au fost salvate:\n{dialog.FileName}");
+    }
+
+    /// <summary>
+    /// Cererea de ștergere a clientului. Se confirmă de două ori, fiindcă nu se
+    /// poate desface: întâi avertismentul, apoi motivul scris.
+    /// </summary>
+    private void OnAnonymize(object sender, RoutedEventArgs e)
+    {
+        if (_summary is null)
+            return;
+
+        var customer = _summary.Customer;
+
+        if (!Dialogs.ConfirmDestructive(
+                $"Anonimizezi clientul {customer.FullName}?\n\n" +
+                "Se șterg definitiv numele, telefonul, e-mailul, data nașterii, observațiile, " +
+                "câmpurile proprii și codul de card, inclusiv din jurnalul de operațiuni. " +
+                $"Cele {_summary.PointsBalance} puncte se anulează. Cumpărăturile rămân în rapoarte, fără nume.\n\n" +
+                "Operațiunea nu se poate anula. Dacă clientul vrea o copie a datelor, exportă-le înainte."))
+        {
+            return;
+        }
+
+        var prompt = new PromptWindow(
+            "Anonimizarea unui client",
+            "Scrie de ce se face anonimizarea, de exemplu „Cererea clientului din 26.10.2026”. " +
+            "Nu scrie numele clientului: motivul rămâne în jurnal.",
+            "MOTIVUL",
+            "Anonimizează definitiv")
+        {
+            Owner = this,
+        };
+
+        if (prompt.ShowDialog() != true)
+            return;
+
+        var services = AppServices.Current;
+        var result = services.Loyalty.AnonymizeCustomer(_customerId, prompt.Value, services.RequireUser);
+
+        if (result.Failed)
+        {
+            Dialogs.Error(result.Error!);
+            return;
+        }
+
+        DataChanged = true;
+        Dialogs.Info("Clientul a fost anonimizat. Copiile de siguranță mai vechi îl mai conțin până la ștergerea lor automată.");
         Load();
     }
 
