@@ -90,22 +90,37 @@ public sealed class ReportingService
         _clock = clock;
     }
 
-    /// <summary>Raport pe un interval. Capătul „până la” este exclusiv, deci o zi se cere ca [zi, zi+1).</summary>
-    public PeriodReport GetPeriodReport(DateTime fromInclusive, DateTime toExclusive)
+    /// <summary>
+    /// Raport pe un interval. Capătul „până la” este exclusiv, deci o zi se cere ca [zi, zi+1).
+    /// </summary>
+    /// <param name="userId">
+    /// Dacă e dat, doar operațiunile făcute de acel utilizator: casierul își vede
+    /// propriile vânzări, nu încasările magazinului. Expirările nu au autor, deci
+    /// în acest caz rămân zero.
+    /// </param>
+    public PeriodReport GetPeriodReport(DateTime fromInclusive, DateTime toExclusive, int? userId = null)
     {
         using var uow = _factory.Create();
 
-        var purchases = uow.Purchases.GetBetween(fromInclusive, toExclusive);
+        var purchases = uow.Purchases.GetBetween(fromInclusive, toExclusive)
+            .Where(p => userId is null || p.RecordedByUserId == userId)
+            .ToList();
         var valid = purchases.Where(p => !p.IsVoided).ToList();
 
-        var transactions = uow.Points.GetTransactionsBetween(fromInclusive, toExclusive);
+        var transactions = uow.Points.GetTransactionsBetween(fromInclusive, toExclusive)
+            .Where(t => userId is null || (t.UserId == userId && t.Type != PointTransactionType.Expired))
+            .ToList();
         var redemptions = uow.Redemptions.GetBetween(fromInclusive, toExclusive)
-            .Where(r => !r.IsVoided)
+            .Where(r => !r.IsVoided && (userId is null || r.UserId == userId))
             .ToList();
 
-        var newCustomers = uow.Customers
-            .Search(new CustomerQuery { IncludeInactive = true, Take = int.MaxValue })
-            .Count(c => c.EnrolledAt >= fromInclusive && c.EnrolledAt < toExclusive);
+        // Înscrierea nu are autor pe client, ci doar în jurnal.
+        var newCustomers = userId is null
+            ? uow.Customers
+                .Search(new CustomerQuery { IncludeInactive = true, Take = int.MaxValue })
+                .Count(c => c.EnrolledAt >= fromInclusive && c.EnrolledAt < toExclusive)
+            : uow.Audit.GetBetween(fromInclusive, toExclusive)
+                .Count(a => a.Action == "CustomerEnrolled" && a.UserId == userId);
 
         return new PeriodReport
         {

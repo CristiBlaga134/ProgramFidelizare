@@ -20,8 +20,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="Rapoarte" Style="{StaticResource H1}" />
-                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
+                    <TextBlock x:Name="HeaderTitle" Text="Rapoarte" Style="{StaticResource H1}" />
+                    <TextBlock x:Name="HeaderSubtitle" Style="{StaticResource Muted}" Margin="0,4,0,0"
                                Text="Starea programului și cifrele perioadei selectate." />
                 </StackPanel>
 
@@ -39,7 +39,7 @@
             </Grid>
 
             <!-- ====================================== Starea programului ==== -->
-            <StackPanel Grid.Row="1" Margin="0,20,0,0">
+            <StackPanel x:Name="OverviewPanel" Grid.Row="1" Margin="0,20,0,0">
                 <TextBlock Text="Starea programului" Style="{StaticResource H2}" />
 
                 <Grid Margin="0,12,0,0">
@@ -188,7 +188,7 @@
             </StackPanel>
 
             <!-- ============================================ Top clienți ==== -->
-            <Border Grid.Row="3" Style="{StaticResource Card}" Margin="0,20,0,0">
+            <Border x:Name="TopCard" Grid.Row="3" Style="{StaticResource Card}" Margin="0,20,0,0">
                 <StackPanel>
                     <TextBlock Text="Clienți cu cel mai mare rulaj în perioadă" Style="{StaticResource H2}" />
 
@@ -213,7 +213,7 @@
             </Border>
 
             <!-- ============================================== Jurnal ==== -->
-            <Border Grid.Row="4" Style="{StaticResource Card}" Margin="0,20,0,24">
+            <Border x:Name="AuditCard" Grid.Row="4" Style="{StaticResource Card}" Margin="0,20,0,24">
                 <StackPanel>
                     <TextBlock Text="Operațiuni recente" Style="{StaticResource H2}" />
                     <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"

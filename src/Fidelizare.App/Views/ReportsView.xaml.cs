@@ -20,16 +20,35 @@ public partial class ReportsView : UserControl, IRefreshable
     public ReportsView()
     {
         InitializeComponent();
+
+        // Casierul își vede doar propriile vânzări. Starea programului, rulajul
+        // fiecărui client și jurnalul tuturor operațiunilor sunt informații de
+        // conducere, iar rulajul pe client este și dată personală.
+        if (!IsManagerView)
+        {
+            HeaderTitle.Text = "Vânzările mele";
+            HeaderSubtitle.Text = "Vânzările, punctele și recompensele înregistrate de tine în perioada selectată.";
+            OverviewPanel.Visibility = Visibility.Collapsed;
+            TopCard.Visibility = Visibility.Collapsed;
+            AuditCard.Visibility = Visibility.Collapsed;
+        }
+
         Loaded += (_, _) => Refresh();
     }
+
+    private static bool IsManagerView => AppServices.Current.RequireUser.CanManagePoints;
 
     public void Refresh()
     {
         try
         {
-            LoadOverview();
+            if (IsManagerView)
+            {
+                LoadOverview();
+                LoadAudit();
+            }
+
             LoadPeriod();
-            LoadAudit();
         }
         catch (Exception ex)
         {
@@ -84,7 +103,7 @@ public partial class ReportsView : UserControl, IRefreshable
             ? $"{title} — {from:dd.MM.yyyy}"
             : $"{title} — {from:dd.MM.yyyy} … {to.AddDays(-1):dd.MM.yyyy}";
 
-        var report = services.Reporting.GetPeriodReport(from, to);
+        var report = services.Reporting.GetPeriodReport(from, to, IsManagerView ? null : services.RequireUser.Id);
 
         NetSalesText.Text = $"{report.NetSales:N2}";
         GrossSalesText.Text = report.DiscountsGiven > 0
@@ -110,6 +129,9 @@ public partial class ReportsView : UserControl, IRefreshable
         VoidedText.Text = report.VoidedPurchases == 0
             ? "nicio vânzare anulată"
             : $"{report.VoidedPurchases} vânzări anulate";
+
+        if (!IsManagerView)
+            return;
 
         var top = services.Reporting.GetTopCustomers(from, to, 15);
         TopGrid.ItemsSource = top;
