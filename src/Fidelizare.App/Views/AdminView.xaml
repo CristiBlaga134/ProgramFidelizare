@@ -576,6 +576,58 @@
 
                         <Border Style="{StaticResource Card}" Margin="0,12,0,0">
                             <StackPanel>
+                                <TextBlock Text="Copii de siguranță automate" Style="{StaticResource H2}" />
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Text="O copie pe zi, făcută la pornire și refăcută la închiderea programului, ca să cuprindă tot ce s-a lucrat. Copiile mai vechi decât numărul de zile ales se șterg singure." />
+
+                                <CheckBox x:Name="AutoBackupCheck" Content="Fă o copie automată în fiecare zi"
+                                          Margin="0,14,0,0" />
+
+                                <TextBlock x:Name="LastBackupText" Style="{StaticResource Muted}" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" />
+
+                                <TextBlock Text="FOLDERUL COPIILOR" Style="{StaticResource FieldLabel}" Margin="0,14,0,4" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="BackupFolderBox" Grid.Column="0" IsReadOnly="True" />
+                                    <Button Grid.Column="1" Content="Deschide" Style="{StaticResource SecondaryButton}"
+                                            Margin="10,0,0,0" Click="OnOpenBackupFolder" />
+                                </Grid>
+
+                                <TextBlock Text="AL DOILEA FOLDER (OPȚIONAL)" Style="{StaticResource FieldLabel}"
+                                           Margin="0,14,0,4" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="ExtraBackupFolderBox" Grid.Column="0" IsReadOnly="True" />
+                                    <Button Grid.Column="1" Content="Alege…" Style="{StaticResource SecondaryButton}"
+                                            Margin="10,0,0,0" Click="OnChooseExtraBackupFolder" />
+                                    <Button Grid.Column="2" Content="Renunță" Style="{StaticResource GhostButton}"
+                                            Margin="6,0,0,0" Click="OnClearExtraBackupFolder" />
+                                </Grid>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                           Text="O memorie externă sau un folder sincronizat (OneDrive, Google Drive). Copiile de lângă baza de date nu ajută dacă se strică discul." />
+
+                                <TextBlock Text="PĂSTREAZĂ COPIILE (ZILE)" Style="{StaticResource FieldLabel}"
+                                           Margin="0,14,0,4" />
+                                <TextBox x:Name="BackupKeepDaysBox" Width="120" HorizontalAlignment="Left" />
+
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <Button Content="Salvează setările" Click="OnSaveBackupSettings" />
+                                    <Button Content="Fă o copie acum" Style="{StaticResource SecondaryButton}"
+                                            Margin="10,0,0,0" Click="OnRunBackupNow" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                            <StackPanel>
                                 <TextBlock Text="Întreținere" Style="{StaticResource H2}" />
 
                                 <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0" TextWrapping="Wrap"

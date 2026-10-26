@@ -11,6 +11,9 @@ namespace Fidelizare.App;
 
 public partial class App : Application
 {
+    /// <summary>Adevărat după o autentificare reușită: abia atunci are rost copia de la închidere.</summary>
+    private bool _sessionStarted;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -44,6 +47,7 @@ public partial class App : Application
         // principală, ca ecranele să pornească direct în identitatea magazinului.
         Branding.ApplyAccent(AppServices.Current.Loyalty.GetRules().AccentColorHex);
 
+        _sessionStarted = true;
         RunStartupMaintenance();
 
         var main = new MainWindow();
@@ -143,6 +147,40 @@ public partial class App : Application
                 "Programul funcționează normal, dar unele solduri pot include puncte deja expirate.\n\n" +
                 $"Detalii: {ex.Message}");
         }
+
+        var backup = AutoBackup.RunIfDue();
+        if (backup.Failed)
+        {
+            LogException(new IOException(backup.Error));
+            Dialogs.Warn(
+                backup.Error + "\n\n" +
+                "Programul funcționează normal. Verifică setările din Administrare → Sistem " +
+                "sau fă o copie manuală.");
+        }
+    }
+
+    /// <summary>
+    /// La închidere se reface copia zilei, ca să cuprindă tot ce s-a lucrat azi.
+    /// Nu se afișează nimic: fereastra s-a închis deja, iar o eroare rămâne în jurnal
+    /// și se vede la următoarea pornire, când copia se încearcă din nou.
+    /// </summary>
+    protected override void OnExit(ExitEventArgs e)
+    {
+        if (_sessionStarted)
+        {
+            try
+            {
+                var backup = AutoBackup.RunOnExit();
+                if (backup.Failed)
+                    LogException(new IOException(backup.Error));
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
+        }
+
+        base.OnExit(e);
     }
 
     private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

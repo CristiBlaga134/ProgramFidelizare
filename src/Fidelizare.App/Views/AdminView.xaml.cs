@@ -361,42 +361,13 @@ public partial class AdminView : UserControl, IRefreshable
         var services = AppServices.Current;
 
         DatabasePathBox.Text = services.DatabasePath;
+        LoadBackup();
 
         var version = typeof(AdminView).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
         AboutText.Text =
             $"Program de fidelizare, versiunea {version}.\n" +
-            "Aplicație autonomă: nu are nevoie de internet, de server sau de instalare.\n" +
+            "Aplicație autonomă: nu are nevoie de internet sau de server.\n" +
             "Toate datele sunt păstrate local, în fișierul indicat mai sus.";
-    }
-
-    private void OnBackup(object sender, RoutedEventArgs e)
-    {
-        var services = AppServices.Current;
-
-        var dialog = new SaveFileDialog
-        {
-            Title = "Salvează copia de siguranță",
-            FileName = $"fidelizare-{services.Clock.Now:yyyy-MM-dd-HHmm}.db",
-            Filter = "Bază de date (*.db)|*.db|Toate fișierele (*.*)|*.*",
-            AddExtension = true,
-        };
-
-        if (dialog.ShowDialog() != true)
-            return;
-
-        try
-        {
-            // Copia se face după o închidere a conexiunilor din pool, ca fișierul
-            // să nu fie surprins la mijlocul unei scrieri.
-            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-            File.Copy(services.DatabasePath, dialog.FileName, overwrite: true);
-
-            Dialogs.Info($"Copia de siguranță a fost salvată:\n{dialog.FileName}");
-        }
-        catch (Exception ex)
-        {
-            Dialogs.Error($"Copia nu a putut fi salvată: {ex.Message}");
-        }
     }
 
     private void OnOpenFolder(object sender, RoutedEventArgs e)
