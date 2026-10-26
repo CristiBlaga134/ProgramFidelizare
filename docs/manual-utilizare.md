@@ -43,7 +43,15 @@ Puteți sări peste acest pas — programul vă avertizează, iar pe ecranul Cas
 rămâne o bandă portocalie până când creați primul cont de lucru. Conturile se pot
 crea oricând și mai târziu, din **Administrare → Utilizatori**.
 
-Baza de date se creează automat, într-un folder numit `date`, lângă program.
+Baza de date se creează automat, la prima pornire:
+
+- dacă programul a fost **instalat** cu programul de instalare, în
+  `C:\ProgramData\ProgramFidelizare`, un folder comun tuturor utilizatorilor
+  Windows ai calculatorului;
+- dacă folosiți **doar executabilul**, copiat într-un folder, într-un subfolder
+  numit `date`, lângă program.
+
+Calea exactă apare oricând în **Administrare → Sistem**.
 
 ---
 
@@ -57,8 +65,8 @@ această informație nu ar valora nimic.
 | Rol | Ce poate face |
 |---|---|
 | **Casier** | Caută clienți, îi înscrie, înregistrează vânzări, acordă recompense, face retururi. |
-| **Responsabil** | În plus: corecții de puncte, anulări de vânzări și recompense, rapoarte, catalogul de recompense. |
-| **Administrator** | În plus: regulile programului, nivelurile, conturile personalului, copiile de siguranță. |
+| **Responsabil** | În plus: corecții de puncte, anulări de vânzări și recompense, rapoartele întregului magazin, catalogul de recompense, exportul datelor unui client. |
+| **Administrator** | În plus: regulile programului, nivelurile, conturile personalului, copiile de siguranță, anonimizarea clienților. |
 
 Conturile se creează **oricând**, nu doar la prima pornire. Aveți trei drumuri
 către ele:
@@ -81,7 +89,7 @@ Ce vede fiecare rol în meniul din stânga:
 
 | Rol | Meniu |
 |---|---|
-| **Casier** | Casă, Clienți, Rapoarte |
+| **Casier** | Casă, Clienți, Rapoarte (doar vânzările proprii) |
 | **Responsabil** | În plus: Administrare — fără filele Utilizatori și Sistem |
 | **Administrator** | Tot, inclusiv conturile și copiile de siguranță |
 
@@ -248,6 +256,26 @@ Butonul **„Retur din cumpărarea selectată”** face același retur ca pe ecr
 Casă, pornit de la rândul ales în fila „Cumpărări”. Îl poate folosi oricine,
 inclusiv casierul. Coloana „Stare” arată cât s-a returnat din fiecare bon.
 
+### Datele personale ale clientului
+
+Clienții au dreptul să afle ce date păstrați despre ei și să ceară ștergerea lor.
+Ambele cereri se rezolvă din fișa clientului.
+
+- **Exportă datele clientului** (responsabil sau administrator) — salvează un
+  fișier text cu tot ce se păstrează despre client: datele personale, acordul de
+  marketing, câmpurile proprii, soldul, cumpărăturile, recompensele și istoricul
+  punctelor. Fișierul se poate tipări sau trimite clientului.
+- **Anonimizează clientul** (doar administrator) — șterge definitiv numele,
+  telefonul, e-mailul, data nașterii, observațiile, câmpurile proprii și codul de
+  card, inclusiv din jurnalul de operațiuni. Punctele rămase se anulează.
+  Cumpărăturile rămân în rapoarte, dar fără nume, ca cifrele magazinului să nu se
+  schimbe. Programul cere confirmare și un motiv, de exemplu „Cererea clientului
+  din 26.10.2026”. Nu scrieți numele clientului în motiv: motivul rămâne în jurnal.
+
+> Anonimizarea nu se poate anula. Dacă clientul vrea și o copie a datelor,
+> exportați-le **înainte**. Copiile de siguranță mai vechi îl mai conțin până la
+> ștergerea lor automată, după numărul de zile stabilit în Administrare → Sistem.
+
 ### Corecții și anulări (responsabil sau administrator)
 
 - **Corecție de puncte** — adaugă sau scade puncte manual. Motivul este
@@ -263,6 +291,10 @@ inclusiv casierul. Coloana „Stare” arată cât s-a returnat din fiecare bon.
 ---
 
 ## 6. Ecranul Rapoarte
+
+Casierul vede aici doar **vânzările lui**: bonurile, încasările, punctele
+acordate și recompensele înregistrate de el în perioada aleasă. Responsabilul și
+administratorul văd tot ce urmează.
 
 **Starea programului** — câți clienți sunt înscriși, câți au cumpărat în
 ultimele 90 de zile, câte puncte nefolosite există și distribuția pe niveluri.
@@ -378,9 +410,19 @@ codurilor generate de acum înainte; cardurile deja emise rămân neschimbate.
 
 ### Sistem
 
-- **Copie de siguranță** — salvează întreaga bază de date într-un fișier ales de
-  dumneavoastră. Faceți-o periodic, pe o memorie externă sau într-un folder
-  sincronizat.
+- **Copii de siguranță automate** — pornite de la început. Programul face o
+  copie pe zi, la pornire, și o reface la închidere, ca să cuprindă tot ce s-a
+  lucrat. Copiile stau în folderul `copii`, lângă baza de date, iar cele mai vechi
+  decât numărul de zile ales (implicit 30) se șterg singure.
+- **Al doilea folder** — alegeți o memorie externă sau un folder sincronizat
+  (OneDrive, Google Drive). Copiile de lângă baza de date nu vă ajută dacă se
+  strică discul. Dacă memoria externă lipsește într-o zi, copia principală se face
+  oricum.
+- **Copie de siguranță manuală** — salvează întreaga bază de date într-un fișier
+  ales de dumneavoastră, de exemplu înainte de o schimbare mare.
+
+> Pentru a reveni la o copie: închideți programul, redenumiți baza de date
+> curentă (`fidelizare.db`) și puneți copia în locul ei, cu același nume.
 - **Verifică punctele expirate acum** — se face automat la fiecare pornire.
   Butonul este util dacă programul rămâne deschis mai multe zile la rând.
 - **Date demonstrative** — creează clienți inventați, ca să vedeți cum arată
@@ -425,11 +467,12 @@ funcțiune, o astfel de comandă apăsată din greșeală ar fi o catastrofă. R
 de la zero se face manual, iar pașii sunt aceștia:
 
 1. **Închideți programul.** Cât timp rulează, fișierele sunt blocate.
-2. Mergeți în folderul unde stă executabilul. Acolo veți găsi un subfolder numit
-   **`date`** (calea exactă apare în **Administrare → Sistem**).
-3. **Redenumiți-l**, de exemplu în `date-vechi`. Ștergeți-l doar dacă sunteți
-   sigur că nu mai aveți nevoie de nimic din el — redenumirea vă lasă o cale de
-   întoarcere.
+2. Mergeți în folderul bazei de date. Calea exactă apare în **Administrare →
+   Sistem**: `C:\ProgramData\ProgramFidelizare` dacă programul e instalat,
+   subfolderul `date` de lângă executabil dacă nu.
+3. **Redenumiți folderul**, de exemplu în `ProgramFidelizare-vechi` sau
+   `date-vechi`. Ștergeți-l doar dacă sunteți sigur că nu mai aveți nevoie de
+   nimic din el — redenumirea vă lasă o cale de întoarcere.
 4. Porniți programul din nou. Nu găsește baza de date, o creează pe loc și vă
    cere din nou configurarea inițială.
 
@@ -437,7 +480,7 @@ Ce se pierde: **toți clienții, punctele, cumpărăturile, recompensele acordat
 conturile personalului.** Ce se recreează automat: structura bazei de date, cele
 trei niveluri, catalogul implicit de șase recompense și regulile implicite.
 
-> Folderul `date` conține trei fișiere: `fidelizare.db` și, uneori, `fidelizare.db-wal`
+> Folderul conține baza de date, `fidelizare.db`, și uneori `fidelizare.db-wal`
 > și `fidelizare.db-shm`. Mutați-le pe toate odată, nu doar pe primul — dacă
 > programul a fost închis forțat, o bună parte din date poate să se afle încă în
 > fișierul `-wal`, nu în cel principal.
@@ -469,6 +512,11 @@ nevoie de ea. Verificați și pragul minim de revendicare din reguli.
 Da, dar necesită o configurare suplimentară. Vedeți secțiunea corespunzătoare
 din `README.md`.
 
+**Un client cere să-i ștergem datele.**
+Un administrator deschide fișa clientului și apasă „Anonimizează clientul”. Dacă
+vrea și o copie, exportați-o înainte, cu „Exportă datele clientului”.
+
 **Unde sunt datele?**
-Într-un singur fișier, în folderul `date` de lângă program. Calea exactă apare
-în **Administrare → Sistem**.
+Într-un singur fișier: în `C:\ProgramData\ProgramFidelizare` dacă programul a
+fost instalat, în folderul `date` de lângă program dacă nu. Calea exactă apare
+în **Administrare → Sistem**, iar copiile automate stau în subfolderul `copii`.

@@ -86,13 +86,13 @@ exportă în CSV, gata de deschis în Excel.
 ## Structura soluției
 
 ```
-ProgramFidelizare.sln
+ProgramFidelizare.slnx
 ├── src/
 │   ├── Fidelizare.Core     Regulile programului. Fără dependențe externe.
 │   ├── Fidelizare.Data     Stocarea în SQLite: schemă, migrări, repository-uri.
 │   └── Fidelizare.App      Interfața WPF.
 ├── tests/
-│   └── Fidelizare.Tests    104 teste: motorul de puncte, retururile, configurabilitatea, importul.
+│   └── Fidelizare.Tests    115 teste: motorul de puncte, retururile, copiile, datele personale, importul.
 └── docs/
 ```
 
@@ -158,16 +158,30 @@ administrator. **Nu există o parolă implicită** — ar fi aceeași pentru toa
 magazinele care primesc executabilul, iar cine o cunoaște ar putea modifica
 solduri de puncte.
 
-Baza de date se creează într-un subfolder `date`, lângă executabil. Dacă
-programul a fost pus într-un loc fără drept de scriere (de obicei
-`Program Files`), datele merg automat în folderul utilizatorului.
+Instalat cu programul de instalare, programul își ține datele în
+`C:\ProgramData\ProgramFidelizare`. Folosit doar ca executabil, baza de date se
+creează într-un subfolder `date`, lângă el; dacă locul nu permite scrierea, datele
+merg automat în folderul utilizatorului.
 
 ## Copii de siguranță
 
-Toate datele magazinului stau într-un singur fișier. Copierea lui este o copie
-de siguranță completă. Aplicația are un buton dedicat în **Administrare →
-Sistem**, care închide întâi conexiunile, ca fișierul să nu fie surprins la
-mijlocul unei scrieri.
+Toate datele magazinului stau într-un singur fișier. Programul face singur o
+copie pe zi, în subfolderul `copii` de lângă baza de date, și păstrează ultimele
+30 de zile. Din **Administrare → Sistem** se poate alege un al doilea folder, de
+exemplu o memorie externă sau un folder sincronizat, și se poate face oricând o
+copie manuală. Copia se face prin mecanismul de backup al SQLite, deci este
+completă chiar cu programul pornit.
+
+## Versiuni noi
+
+O etichetă de forma `v1.0.1`, urcată pe GitHub, compilează și publică singură
+installerul la Releases. Eticheta trebuie să corespundă cu `<Version>` din
+`src/Fidelizare.App/Fidelizare.App.csproj`.
+
+```powershell
+git tag v1.0.1
+git push origin v1.0.1
+```
 
 ## Mai multe case de marcat
 

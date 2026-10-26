@@ -176,6 +176,22 @@ dintr-un magazin. Nu este o soluție pentru un lanț de magazine — acolo ar fi
 nevoie de un server de baze de date propriu-zis, ceea ce stratul de date permite
 fără a rescrie aplicația.
 
+### Copiile de siguranță
+
+Copia se face prin API-ul de backup al SQLite, nu prin copierea fișierului. În
+modul WAL ultimele scrieri pot sta încă în fișierul `-wal`, iar o copiere simplă
+ar lua doar fișierul principal, adică o bază fără ultimele vânzări. Backup-ul
+citește baza așa cum o vede o conexiune, deci copia este coerentă chiar cu
+programul în lucru. Copia se scrie într-un fișier temporar, trecut apoi pe
+jurnalul clasic și redenumit la final: o copie întreruptă nu înlocuiește una bună,
+iar rezultatul e un singur fișier, ușor de mutat.
+
+Copiile automate sunt câte una pe zi (`fidelizare-2026-10-26.db`): se fac la
+pornire, dacă azi nu există încă una, și se refac la închidere. Ștergerea celor
+vechi atinge doar fișierele cu acest model de nume, deci o copie manuală pusă în
+același folder rămâne. Al doilea folder, opțional, primește o copie a fișierului
+zilei; dacă lipsește (o memorie externă scoasă), copia principală rămâne valabilă.
+
 ### Căutarea fără diacritice
 
 `Customers` are o coloană `SearchKey` cu numele, telefonul, e-mailul și codul de
@@ -327,6 +343,20 @@ repornire.
 **Jurnalul de audit** reține corecțiile de puncte, anulările, modificările de
 reguli și operațiunile pe conturi, cu autorul și valorile de dinainte și de după.
 
+**Datele personale** (GDPR). Exportul pentru un client (art. 15) produce un
+fișier text cu tot ce se păstrează despre el. Anonimizarea (art. 17) nu șterge
+clientul, fiindcă cumpărăturile lui fac parte din rapoarte și din istoricul altor
+calcule, ci îi șterge datele care îl identifică: nume, telefon, e-mail, data
+nașterii, observații, câmpuri proprii, cod de card. Numele, telefonul, e-mailul și
+codul de card se înlocuiesc și în detaliile jurnalului și în notele istoricului de
+puncte, unde fuseseră scrise ca text. Punctele rămase se anulează. Telefonul și
+codul de card devin libere pentru un client nou. Copiile de siguranță vechi îl
+mai conțin până la ștergerea lor automată.
+
+**Ceasul jurnalului.** Toate scrierile în jurnal folosesc ceasul aplicației
+(`IClock`), nu ceasul Windows, ca testele cu timp simulat și filtrele pe perioadă
+să vadă aceleași momente.
+
 **Ce nu face programul:** nu criptează fișierul bazei de date. Cine are acces
 fizic la calculator poate citi datele clienților. Pentru un magazin cu un singur
 punct de lucru, protecția potrivită este cea a sistemului de operare —
@@ -404,7 +434,7 @@ greșeala s-ar vedea abia în raportul de la sfârșitul zilei.
 
 ## 7. Testarea
 
-104 teste automate, concentrate acolo unde greșelile ar costa bani:
+115 teste automate, concentrate acolo unde greșelile ar costa bani:
 
 - rotunjirea punctelor și aplicarea multiplicatorului de nivel;
 - încadrarea pe niveluri, la limitele pragurilor;
@@ -413,6 +443,9 @@ greșeala s-ar vedea abia în raportul de la sfârșitul zilei.
 - anularea recompenselor și restituirea în loturile originale;
 - retururile parțiale: calculul proporțional, retururile succesive pe același bon,
   efectul asupra nivelului și anularea după un retur;
+- copiile de siguranță: conținutul complet, o copie pe zi, ștergerea celor vechi;
+- anonimizarea și exportul datelor unui client, inclusiv curățarea jurnalului;
+- raportul filtrat pe utilizator, pentru ecranul casierului;
 - fereastra aniversară, inclusiv trecerea peste 31 decembrie și 29 februarie în
   anii nebisecți;
 - căutarea cu diacritice;
@@ -424,6 +457,11 @@ controlabil.
 ```powershell
 dotnet test
 ```
+
+Pe GitHub, `.github/workflows/build.yml` rulează testele la fiecare push și pull
+request. `release.yml` pornește la o etichetă `v*`: verifică faptul că eticheta
+corespunde versiunii din proiect, rulează testele, compilează installerul și îl
+publică la Releases.
 
 Interfața a fost verificată separat, prin automatizare UI: pornire, autentificare,
 navigare pe toate ecranele, căutarea unui client și înregistrarea unei vânzări cu
